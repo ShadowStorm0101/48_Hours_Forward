@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2>Dashboard</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul>
+      {% for category, message in messages %}
+        <li style="color: {{ 'red' if category == 'error' else 'green' }};">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<p>Your role: <strong>{{ role }}</strong></p>
+
+<div style="margin-top: 1rem;">
+  <a href="{{ url_for('main.logout') }}">Logout</a>
+</div>
+{% endblock %}
