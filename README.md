@@ -11,6 +11,10 @@
 - Role System
 - NHS help pages (redirection)
 - Streak function
-- Reward scheme (using sponsors to distribute prizes such as coupons or gifts the sponsors give to us) if a user reaches a certain amount of points)
+- Admin and Moderator function 
 - Settings page for accessibility features and log out
-- Messaging System 
+- Diary system (journellling system) 
+- Try to fit it in mobile version too 
+- Implement 2FA 
+- Implement email notifiication system 
+- Implement Data Analysis methods
