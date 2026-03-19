@@ -2,41 +2,62 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<h1>Register</h1>
+<h2>Register</h2>
 
+<!-- Flash messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul>
       {% for category, message in messages %}
-        <li style="color: {{ 'red' if category == 'error' else 'green' }};">{{ message }}</li>
+        <li style="color: {{ 'red' if category == 'error' else 'green' }};">
+          {{ message }}
+        </li>
       {% endfor %}
     </ul>
   {% endif %}
 {% endwith %}
+
 <form method="POST" novalidate>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  
-    <label>Username (public):</label>
-    <input type="text" name="public_username" maxlength="50" autocomplete="username" required>
-    <br>
-  
-    <label>Email:</label>
-    <input type="text" name="email" maxlength="80" autocomplete="email" required>
-    <br>
-  
-    <label>Password:</label>
-    <input type="password" name="password" autocomplete="new-password" required>
-    <br>
-  
-    <label>Biography:</label>
-    <input type="text" name="bio" maxlength="300">
-    <br>
-  
-    <input type="submit" value="Register">
-  </form>
-  
-  <p>
-    Already have an account?
-    <a href="{{ url_for('main.login') }}">Login</a>
-  </p>
-  {% endblock %}
+
+    <p>
+        <label for="public_username">Username (public):</label><br>
+        <input type="text" name="public_username" id="public_username" maxlength="50" autocomplete="username" required>
+        {% if errors and errors.get('public_username') %}
+          {% for error in errors.get('public_username') %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="email">Email:</label><br>
+        <input type="text" name="email" id="email" maxlength="80" autocomplete="email" required>
+        {% if errors and errors.get('email') %}
+          {% for error in errors.get('email') %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="password">Password:</label><br>
+        <input type="password" name="password" id="password" autocomplete="new-password" required>
+        {% if errors and errors.get('password') %}
+          {% for error in errors.get('password') %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+    </p>
+
+    <p>
+        <input type="submit" value="Register">
+    </p>
+</form>
+
+<p>
+  Already have an account?
+  <a href="{{ url_for('main.login') }}">Login</a>
+</p>
+
+{% endblock %}
