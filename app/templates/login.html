@@ -4,11 +4,14 @@
 {% block content %}
 <h2>Login</h2>
 
+<!-- Flash messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul>
       {% for category, message in messages %}
-        <li style="color: {{ 'red' if category == 'error' else 'green' }};">{{ message }}</li>
+        <li style="color: {{ 'red' if category == 'error' else 'green' }};">
+          {{ message }}
+        </li>
       {% endfor %}
     </ul>
   {% endif %}
@@ -16,20 +19,35 @@
 
 <form method="POST" novalidate>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  
-    <label>Email:</label>
-    <input type="text" name="email" autocomplete="email" required>
-    <br>
-  
-    <label>Password:</label>
-    <input type="password" name="password" autocomplete="current-password" required>
-    <br>
-  
-    <input type="submit" value="Login">
-  </form>
-  
-  <p>
-    Don’t have an account?
-    <a href="{{ url_for('main.register') }}">Register</a>
-  </p>
-  {% endblock %}
+
+    <p>
+        <label for="email">Email:</label><br>
+        <input type="text" name="email" id="email" autocomplete="email" required>
+        {% if errors and errors.get('email') %}
+          {% for error in errors.get('email') %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="password">Password:</label><br>
+        <input type="password" name="password" id="password" autocomplete="current-password" required>
+        {% if errors and errors.get('password') %}
+          {% for error in errors.get('password') %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+    </p>
+
+    <p>
+        <input type="submit" value="Login">
+    </p>
+</form>
+
+<p>
+  Don’t have an account?
+  <a href="{{ url_for('main.register') }}">Register</a>
+</p>
+
+{% endblock %}
