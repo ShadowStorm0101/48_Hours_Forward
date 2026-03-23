@@ -1,7 +1,6 @@
-
-
 import logging
 from datetime import datetime
+from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
 from sqlalchemy.orm import joinedload
@@ -16,6 +15,14 @@ main = Blueprint("main", __name__)
 
 security_logger = logging.getLogger("security")
 
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Please log in first.", "error")
+            return redirect(url_for("main.login"))
+        return view_func(*args, **kwargs)
+    return wrapped_view
 
 def _current_user() -> User | None:
     uid = session.get("user_id")
@@ -23,11 +30,13 @@ def _current_user() -> User | None:
         return None
     return User.query.get(uid)
 
-
 @main.route("/")
 def home():
-    return redirect(url_for("main.dashboard"))
-
+    # If already logged in, skip landing page
+    if session.get("user_id"):
+        return redirect(url_for("main.dashboard"))
+    else:
+        return render_template("index.html")
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
@@ -75,8 +84,6 @@ def register():
 
     return render_template("register.html")
 
-
-
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -109,9 +116,8 @@ def login():
 
     return render_template("login.html")
 
-
-
 @main.route("/dashboard")
+@login_required
 def dashboard():
     user = _current_user()
     if not user:
@@ -129,19 +135,45 @@ def dashboard():
     # Your dashboard.html currently only uses role, but keeping posts ready is useful later.
     return render_template("dashboard.html", role=user.role, posts=posts, user=user)
 
-
 @main.route("/logout")
+@login_required
 def logout():
     session.clear()
     flash("Logged out.", "success")
     return redirect(url_for("main.login"))
 
+@main.route("/journal")
+@login_required
+def journal():
+    return render_template("journal.html")
+
+@main.route("/resources")
+@login_required
+def resources():
+    return render_template("resources.html")
+
+@main.route("/map")
+@login_required
+def map():
+    return render_template("map.html")
+
+@main.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html")
+
+@main.route("/help")
+@login_required
+def help():
+    return render_template("help.html")
 
 def require_login():
     # Logged in if user_id exists
     if "user_id" not in session:
         return redirect(url_for("main.login"))
     return None
+
+
 
 
 

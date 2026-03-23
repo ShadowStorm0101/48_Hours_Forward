@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            background-color: #f4f4f4;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .login {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .signup {
+            background-color: #2196F3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome</h1>
+    <p>Please choose an option</p>
+
+    <a href="{{ url_for('main.login') }}">
+        <button class="btn login">Login</button>
+    </a>
+
+    <a href="{{ url_for('main.register') }}">
+        <button class="btn signup">Sign Up</button>
+    </a>
+
+</body>
+</html>
