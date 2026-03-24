@@ -177,7 +177,7 @@ def update_habits():
         flash("User not found", "error")
         return redirect(url_for("main.login"))
 
-    selected = request.form.getlist("habits")
+    habit = request.form.getlist("habit")
 
     # Reset all
     user.alcohol = False
@@ -185,11 +185,11 @@ def update_habits():
     user.narcotics = False
 
     # Apply choices
-    if "alcohol" in selected:
+    if "alcohol" in habit:
         user.alcohol = True
-    if "smoking" in selected:
+    if "smoking" in habit:
         user.smoking = True
-    if "narcotics" in selected:
+    if "narcotics" in habit:
         user.narcotics = True
 
     db.session.commit()
