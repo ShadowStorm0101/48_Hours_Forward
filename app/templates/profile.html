@@ -3,11 +3,30 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-<h1>Profile Page</h1>
+<h1 style="text-align:center;">Profile Page</h1>
+
+<div style="text-align:center; margin-top: 2rem;">
+  <form method="POST" action="{{ url_for('main.update_habits') }}">
+
+    <button type="submit" name="habit" value="alcohol">
+      Alcohol
+    </button>
+
+    <button type="submit" name="habit" value="smoking">
+      Smoking
+    </button>
+
+    <button type="submit" name="habit" value="narcotics">
+      Narcotics
+    </button>
+
+  </form>
+</div>
 
 <div style="margin-top: 1rem;">
   <a href="{{ url_for('main.logout') }}">Logout</a>
 </div>
+
 <div style="margin-top: 1rem;">
   <a href="{{ url_for('main.change_password') }}">Change Password</a>
 </div>
