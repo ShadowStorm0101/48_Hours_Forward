@@ -1,130 +1,61 @@
 {% extends "base.html" %}
-
 {% block title %}Profile{% endblock %}
 
 {% block content %}
+<h2>Profile</h2>
 
-<style>
-  body {
-    font-family: Arial, sans-serif;
-  }
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul>
+      {% for category, message in messages %}
+        <li style="color: {{ 'red' if category == 'error' else 'green' }};">
+          {{ message }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
-  .container {
-    text-align: center;
-    margin-top: 20px;
-  }
+<!-- USER INFO -->
+<div style="margin-bottom: 20px;">
+  <p><strong>Name:</strong> {{ user.username }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+</div>
 
-  /* Top nav */
-  .nav-bar {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+<!-- VICES -->
+<form method="POST" action="{{ url_for('main.update_habits') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-  .nav-btn {
-    padding: 10px 20px;
-    border-radius: 10px;
-    border: 1px solid #5a6f8f;
-    background-color: #e6e6e6;
-    cursor: pointer;
-  }
+  <div style="display:flex; gap:20px; justify-content:center; margin:30px 0;">
 
-  .nav-btn.active {
-    background-color: #a9b9d1;
-  }
+    <button type="submit" name="habit" value="alcohol"
+      class="nav-item {% if user.alcohol %}active{% endif %}">
+      Alcohol
+    </button>
 
-  /* Main buttons */
-  .main-btn {
-    margin: 15px auto;
-    display: block;
-    padding: 12px 40px;
-    border-radius: 25px;
-    border: 1px solid #5a6f8f;
-    background-color: #e6e6e6;
-    cursor: pointer;
-    font-size: 16px;
-  }
+    <button type="submit" name="habit" value="smoking"
+      class="nav-item {% if user.smoking %}active{% endif %}">
+      Nicotine
+    </button>
 
-  /* Form inputs */
-  .input-group {
-    margin: 10px 0;
-  }
+    <button type="submit" name="habit" value="narcotics"
+      class="nav-item {% if user.narcotics %}active{% endif %}">
+      Narcotics
+    </button>
 
-  input {
-    padding: 5px;
-    width: 250px;
-  }
-
-  /* Habit buttons */
-  .habit-container {
-    display: flex;
-    justify-content: center;
-    gap: 25px;
-    margin: 30px 0;
-  }
-
-  .habit-btn {
-    width: 100px;
-    height: 100px;
-    border-radius: 15px;
-    border: 2px solid #5a6f8f;
-    background-color: #e6e6e6;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  .habit-btn.active {
-    background-color: #a9b9d1;
-    box-shadow: 0 0 0 4px #c7d4ea;
-  }
-</style>
-
- <!-- USER INFO -->
-  <div class="input-group">
-    <label>First Name:</label>
-    <input type="text" value="{{ user.username }}" disabled>
   </div>
+</form>
 
-  <div class="input-group">
-    <label>Email:</label>
-    <input type="text" value="{{ user.email }}" disabled>
-  </div>
-
-  <!-- HABITS FORM -->
-  <form method="POST" action="{{ url_for('main.update_habits') }}">
-
-    <div class="habit-container">
-
-      <button type="submit" name="habit" value="alcohol"
-        class="habit-btn {% if user.alcohol %}active{% endif %}">
-        Alcohol
-      </button>
-
-      <button type="submit" name="habit" value="smoking"
-        class="habit-btn {% if user.smoking %}active{% endif %}">
-        Nicotine
-      </button>
-
-      <button type="submit" name="habit" value="narcotics"
-        class="habit-btn {% if user.narcotics %}active{% endif %}">
-        Narcotics
-      </button>
-
-    </div>
-
-  </form>
-
-  <!-- SAVE + PASSWORD -->
-  <button class="main-btn">Save Changes</button>
+<!-- ACTIONS -->
+<div style="display:flex; flex-direction:column; gap:15px; align-items:center;">
 
   <a href="{{ url_for('main.change_password') }}">
-    <button class="main-btn">Change Password</button>
+    <button class="nav-item">Change Password</button>
   </a>
 
-<!-- LOGOUT -->
   <a href="{{ url_for('main.logout') }}">
-    <button class="main-btn">Log Out</button>
+    <button class="nav-item">Log Out</button>
   </a>
 
 </div>
