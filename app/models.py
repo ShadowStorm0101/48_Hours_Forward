@@ -21,9 +21,6 @@ class User(db.Model):
         default="user",
     )
 
-    # encrypted bio (nullable)
-    bio: Mapped[Optional[str]] = mapped_column(String(1200), nullable=True)
-
     posts: Mapped[List["Post"]] = relationship(
         "Post",
         back_populates="author",
@@ -63,28 +60,24 @@ def seed_data():
             email="admin@example.com",
             password=hash_password("Admin123!AAA", pepper),
             role="admin",
-            bio=None,
         )
         moderator = User(
             username="mod1",
             email="mod1@example.com",
             password=hash_password("Mod123!AAAA1", pepper),
             role="moderator",
-            bio=None,
         )
         user1 = User(
             username="user1",
             email="user1@example.com",
             password=hash_password("User123!AAAA1", pepper),
             role="user",
-            bio=None,
         )
         user2 = User(
             username="user2",
             email="user2@example.com",
             password=hash_password("User456!AAAA1", pepper),
             role="user",
-            bio=None,
         )
 
         db.session.add_all([admin, moderator, user1, user2])

@@ -44,7 +44,6 @@ def register():
         raw_public_username = request.form.get("public_username", "")
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
-        raw_bio = request.form.get("bio", "")
 
         ip = request.remote_addr or "unknown"
         ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -53,7 +52,6 @@ def register():
             public_username = validate_username(raw_public_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
-            bio = validate_bio(raw_bio)
         except ValueError as e:
             flash(str(e), "error")
             security_logger.warning("REGISTER FAILED at %s ip=%s email=%r reason=%s", ts, ip, raw_email, str(e))
@@ -68,13 +66,11 @@ def register():
             flash("That username is taken. Choose another.", "error")
             return render_template("register.html")
 
-        safe_bio = sanitize_html(bio) if bio else ""
-        encrypted_bio = encrypt_bio(safe_bio, current_app.config["BIO_ENCRYPTION_KEY"]) if safe_bio else None
 
         pepper = current_app.config["PASSWORD_PEPPER"]
         pw_hash = hash_password(password, pepper)
 
-        user = User(username=public_username, email=email, password=pw_hash, role="user", bio=encrypted_bio)
+        user = User(username=public_username, email=email, password=pw_hash, role="user")
         db.session.add(user)
         db.session.commit()
 
@@ -132,7 +128,7 @@ def dashboard():
         .all()
     )
 
-    # Your dashboard.html currently only uses role, but keeping posts ready is useful later.
+    # Your dashboard.html currently only uses role, but keeping posts ready is useful later. *What does this mean-zak*
     return render_template("dashboard.html", role=user.role, posts=posts, user=user)
 
 @main.route("/logout")
