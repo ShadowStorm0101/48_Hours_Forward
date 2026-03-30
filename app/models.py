@@ -1,5 +1,7 @@
 
 from __future__ import annotations
+
+from email.policy import default
 from typing import List, Optional
 
 from . import db
@@ -20,12 +22,17 @@ class User(db.Model):
         nullable=False,
         default="user",
     )
+    alcohol_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    narcotics_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    nicotine_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    # addiction_type: Mapped[str] = mapped_column(String(16), nullable=False) # We seem to use booleans, can revisit -zak
 
     posts: Mapped[List["Post"]] = relationship(
         "Post",
         back_populates="author",
         cascade="all, delete-orphan"
     )
+
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
@@ -60,6 +67,9 @@ def seed_data():
             email="admin@example.com",
             password=hash_password("Admin123!AAA", pepper),
             role="admin",
+            alcohol_streak_start=datetime.utcnow(),
+            narcotics_streak_start = datetime.utcnow(),
+            nicotine_streak_start = datetime.utcnow()
         )
         moderator = User(
             username="mod1",
@@ -72,12 +82,18 @@ def seed_data():
             email="user1@example.com",
             password=hash_password("User123!AAAA1", pepper),
             role="user",
+            alcohol_streak_start=datetime.utcnow(),
+            narcotics_streak_start=datetime.utcnow(),
+            nicotine_streak_start=datetime.utcnow()
         )
         user2 = User(
             username="user2",
             email="user2@example.com",
             password=hash_password("User456!AAAA1", pepper),
             role="user",
+            alcohol_streak_start=datetime.utcnow(),
+            narcotics_streak_start=datetime.utcnow(),
+            nicotine_streak_start=datetime.utcnow()
         )
 
         db.session.add_all([admin, moderator, user1, user2])

@@ -11,6 +11,8 @@ from .utils.validators import validate_email, validate_password, validate_bio, v
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
 
+from dashboard import reset_counter
+
 main = Blueprint("main", __name__)
 
 security_logger = logging.getLogger("security")
@@ -175,23 +177,37 @@ def update_habits():
 
     selected = request.form.getlist("habits")
 
-    # Reset all
-    user.alcohol = False
-    user.smoking = False
-    user.narcotics = False
-
     # Apply choices
     if "alcohol" in selected:
         user.alcohol = True
+    else:
+        user.alcohol = False
+
     if "smoking" in selected:
         user.smoking = True
+    else:
+        user.smoking = False
+
     if "narcotics" in selected:
         user.narcotics = True
+    else:
+        user.narcotics = False
+
+    # Do you want to submit these changes? yes/no handled by dashboard.html
+
 
     db.session.commit()
 
     flash("Preferences updated!", "success")
     return redirect(url_for("main.profile"))
+
+@main.route("/reset")
+@login_required
+def reset():
+    user = _current_user()
+    reset_counter(user)             # calls function to set datetime to now
+    db.session.commit()             # commit to db
+    return redirect(url_for("main.dashboard"))
 
 @main.route("/help")
 @login_required
