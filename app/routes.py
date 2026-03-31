@@ -155,8 +155,29 @@ def resources():
 @main.route("/map")
 @login_required
 def map():
+    places = [
+        {
+            "name": "St James' Park",
+            "lat": 54.975170,
+            "lng": -1.622539,
+            "description": "Home of Newcastle United Football Club."
+        },
+        {
+            "name": "Monument Metro Station",
+            "lat": 54.9737,
+            "lng": -1.6131,
+            "description": "Major Tyne and Wear Metro interchange in Newcastle city centre."
+        },
+        {
+            "name": "Metrocentre",
+            "lat": 54.956944,
+            "lng": -1.668889,
+            "description": "Large shopping and leisure complex in Gateshead."
+        }
+    ]
     return render_template("map.html",
-                           maps_api_key=current_app.config["MAPS_API_KEY"])
+                           maps_api_key=current_app.config["MAPS_API_KEY"],
+                           places = places)
 
 @main.route("/profile")
 @login_required
