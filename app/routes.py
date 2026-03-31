@@ -155,7 +155,8 @@ def resources():
 @main.route("/map")
 @login_required
 def map():
-    return render_template("map.html")
+    return render_template("map.html",
+                           maps_api_key=current_app.config["MAPS_API_KEY"])
 
 @main.route("/profile")
 @login_required
