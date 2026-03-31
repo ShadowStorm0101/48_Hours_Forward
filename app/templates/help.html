@@ -9,7 +9,7 @@
 </head>
 <body>
   <script>
-    // Check locally stored preference and apply immediately to prevent flashing
+    // check local storage high contrast preference and apply
     if (localStorage.getItem('highContrast') === 'true') {
       document.body.classList.add('high-contrast');
     }
@@ -88,7 +88,7 @@
   </div>
 
   <script>
-    // Async Form Submission Handler
+    // Making sure that the submit buttons on the forms do not go onto formspree website and stays on the help page
     async function handleFormSubmit(event, statusElementId) {
       event.preventDefault();
       const form = event.target;
