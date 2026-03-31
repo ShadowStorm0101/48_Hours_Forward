@@ -5,10 +5,61 @@
 {% block content %}
 <h1>Map Page</h1>
 
-<div style="display: flex; gap: 20px; height: 500px;">
-  <div style="flex: 3;">
-      <div id="map" style="width:100%; height:100%;"></div>
+<div id="flex_div">
+  <div id="map_div">
+      <div id="map"></div>
   </div>
+
+  <div id="services_frame">
+      <h3 id="services_header">Nearby Addiction Services</h3>
+      {% for place in places %}
+      <button class="services_button"
+          onclick="focusPlace({{ place.lat }}, {{ place.lng }})">
+          {{ place.name }}
+      </button>
+      {% endfor %}
+  </div>
+</div>
+
+<style>
+  #flex_div {
+      display: flex;
+      gap: 20px;
+      height: 500px;
+  }
+
+  #map_div {
+      flex: 3;
+  }
+
+  #map {
+      width: 100%;
+      height: 100%;
+  }
+
+  #services_frame {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch; /* centers buttons horizontally inside container */
+  }
+  #services_header{
+      text-align: center;
+  }
+
+  .services_button {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border-radius: 15px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+  }
+</style>
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}"></script>
 
@@ -58,16 +109,4 @@ function loadMap() {
 
 loadMap();
 </script>
-
-<div style="flex: 1; overflow-y: auto; border: 1px solid #ccc; padding: 10px; align-items: center; ">
-    <h3>Nearby Addiction Services</h3>
-        {% for place in places %}
-        <button
-            onclick="focusPlace({{ place.lat }}, {{ place.lng }})"
-            style="width: 100%; height: 50px; margin-bottom: 8px;">
-            {{ place.name }}
-        </button>
-    {% endfor %}
- </div>
-</div>
 {% endblock %}
