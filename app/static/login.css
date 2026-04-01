@@ -1,0 +1,39 @@
+#logo {
+    width: 300px;
+    display: block;
+}
+
+form {
+    width: 300px; /* match logo width */
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 100px 1fr; /* label | input */
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.form-row label {
+    text-align: right;
+    margin-right: 10px;
+}
+
+.form-row input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.button {
+    width: 100%; /* match form width */
+    padding: 15px 30px;
+    margin: 10px 0;
+    border: 2px solid black;
+    border-radius: 15px;
+    cursor: pointer;
+
+    font-size: 18px;
+    text-decoration: none;
+    text-align: center;
+    color: black;
+}
