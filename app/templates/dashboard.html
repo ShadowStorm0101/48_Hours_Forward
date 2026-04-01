@@ -14,9 +14,33 @@
   {% endif %}
 {% endwith %}
 
-<p>Your role: <strong>{{ role }}</strong></p>
 
 
+<div class="dashboard-box">
+  <p>Tracking:</p>
 
+  <ul>
+    {% if user.alcohol_streak_start is not none %}
+      <li>
+        Alcohol<br>
+        Current streak: {{ current_alcohol_streak }} days
+      </li>
+    {% endif %}
+
+    {% if user.nicotine_streak_start is not none %}
+      <li>
+        Nicotine<br>
+        Current streak: {{ current_nicotine_streak }} days
+      </li>
+    {% endif %}
+
+    {% if user.narcotics_streak_start is not none %}
+      <li>
+        Narcotics<br>
+        Current streak: {{ current_narcotics_streak }} days
+      </li>
+    {% endif %}
+  </ul>
+</div>
 
 {% endblock %}

@@ -6,12 +6,11 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from sqlalchemy.orm import joinedload
 
 from . import db
-from .models import User, Post
+from .models import User
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
 
-from dashboard import reset_counter
 
 main = Blueprint("main", __name__)
 
@@ -122,16 +121,33 @@ def dashboard():
         flash("Please log in first.", "error")
         return redirect(url_for("main.login"))
 
-    # Optional: load posts (safe default)
-    posts = (
-        Post.query.options(joinedload(Post.author))
-        .order_by(Post.created_at.desc())
-        .limit(25)
-        .all()
-    )
+
+    # Calculating streak, now minus streak start
+    if user.alcohol_streak_start is not None:
+        current_alcohol_streak = (datetime.utcnow() - user.alcohol_streak_start).days
+    else:
+        current_alcohol_streak = None
+
+    if user.user.nicotine_streak_start is not None:
+        current_nicotine_streak = (datetime.utcnow() - user.nicotine_streak_start).days
+    else:
+        current_nicotine_streak = None
+
+    if user.narcotics_streak_start is not None:
+        current_narcotics_streak = (datetime.utcnow() - user.narcotics_streak_start).days
+    else:
+        current_narcotics_streak = None
+
 
     # Your dashboard.html currently only uses role, but keeping posts ready is useful later. *What does this mean-zak*
-    return render_template("dashboard.html", role=user.role, posts=posts, user=user)
+    # passing streaks - zak
+    return render_template(
+        "dashboard.html",
+        user=user,
+        current_alcohol_streak=current_alcohol_streak,
+        current_nicotine_streak=current_nicotine_streak,
+        current_narcotics_streak=current_narcotics_streak
+    )
 
 @main.route("/logout")
 @login_required
@@ -177,28 +193,33 @@ def update_habits():
 
     selected = request.form.getlist("habits")
 
-    # Apply choices
+    # Apply choices, Also need to call function to start addiction time, reset_counter(user) from dashboard.py
     if "alcohol" in selected:
-        user.alcohol = True
+        if user.alcohol_streak_start is None:
+            user.alcohol_streak_start = datetime.utcnow()
     else:
-        user.alcohol = False
+        user.alcohol_streak_start = None
 
-    if "smoking" in selected:
-        user.smoking = True
+    if "nicotine" in selected:
+        if user.nicotine_streak_start is None:
+            user.nicotine_streak_start = datetime.utcnow()
     else:
-        user.smoking = False
+        user.nicotine_streak_start = None
 
     if "narcotics" in selected:
-        user.narcotics = True
+        if user.narcotics_streak_start is None:
+            user.narcotics_streak_start = datetime.utcnow()
     else:
-        user.narcotics = False
+        user.narcotics_streak_start = None
 
-    # Do you want to submit these changes? yes/no handled by dashboard.html
+    # Do you want to submit these changes? yes/no handled by dashboard.html, to do later
 
 
     db.session.commit()
 
     flash("Preferences updated!", "success")
+
+
     return redirect(url_for("main.profile"))
 
 @main.route("/reset")
