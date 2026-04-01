@@ -1,9 +1,8 @@
-
 from __future__ import annotations
 from typing import List, Optional
 
 from . import db
-from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime
+from sqlalchemy import Integer, String, Float, ForeignKey, Enum, Text, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -33,7 +32,6 @@ class User(db.Model):
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
 
-
 class Post(db.Model):
     __tablename__ = "posts"
 
@@ -49,6 +47,17 @@ class Post(db.Model):
     def __repr__(self) -> str:
         return f"Post(id={self.id!r}, title={self.title!r}, author_id={self.author_id!r})"
 
+class LocationService(db.Model):
+    __tablename__ = "location_services"
+
+    id:Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    lat: Mapped[float] = mapped_column(Float, index=True, nullable=False)
+    lon: Mapped[float] = mapped_column(Float, index=True, nullable=False)
+
+    is_alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_nicotine: Mapped[bool] = mapped_column(Boolean, default=False)
 
 def seed_data():
     """Populate sample users and posts (called from reset_db.py / run.py)."""
