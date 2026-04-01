@@ -9,7 +9,7 @@ body {
   align-items: center;
   padding: 15px 40px 40px;
   margin: 0;
-  background: #f1f3f5;
+  background: #e7eaeb;
   color: #1a1a1a;
 }
 
@@ -47,4 +47,38 @@ body {
 .container {
   display: flex;
   gap: 50px;
+}
+
+/* High Contrast Mode Global Styles */
+body.high-contrast {
+  background-color: #000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .navbar {
+  background-color: #000;
+}
+
+body.high-contrast .nav-item {
+  background-color: #000 !important;
+  color: #0ff !important;
+  border: 2px solid #0ff;
+  box-shadow: none !important;
+}
+
+body.high-contrast .nav-item a {
+  text-decoration: none;
+  color: inherit;
+}
+
+body.high-contrast .nav-item:hover {
+  background: #ff0 !important;
+  color: #000 !important;
+  border-color: #fff;
+}
+
+body.high-contrast .nav-item.active {
+  background: #0ff !important;
+  color: #000 !important;
+  border-color: #0ff;
 }

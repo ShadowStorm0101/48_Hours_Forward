@@ -204,7 +204,42 @@ def map():
 @main.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html")
+    user = _current_user()
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.login"))
+
+    return render_template("profile.html", user=user)
+
+@main.route("/update-habits", methods=["POST"])
+@login_required
+def update_habits():
+    user = _current_user()
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.login"))
+
+    selected = request.form.getlist("habits")
+
+    # Reset all
+    user.alcohol = False
+    user.smoking = False
+    user.narcotics = False
+
+    # Apply choices
+    if "alcohol" in selected:
+        user.alcohol = True
+    if "smoking" in selected:
+        user.smoking = True
+    if "narcotics" in selected:
+        user.narcotics = True
+
+    db.session.commit()
+
+    flash("Preferences updated!", "success")
+    return redirect(url_for("main.profile"))
 
 @main.route("/help")
 @login_required

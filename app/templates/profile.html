@@ -3,12 +3,130 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-<h1>Profile Page</h1>
 
-<div style="margin-top: 1rem;">
-  <a href="{{ url_for('main.logout') }}">Logout</a>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+
+  .container {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  /* Top nav */
+  .nav-bar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .nav-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid #5a6f8f;
+    background-color: #e6e6e6;
+    cursor: pointer;
+  }
+
+  .nav-btn.active {
+    background-color: #a9b9d1;
+  }
+
+  /* Main buttons */
+  .main-btn {
+    margin: 15px auto;
+    display: block;
+    padding: 12px 40px;
+    border-radius: 25px;
+    border: 1px solid #5a6f8f;
+    background-color: #e6e6e6;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  /* Form inputs */
+  .input-group {
+    margin: 10px 0;
+  }
+
+  input {
+    padding: 5px;
+    width: 250px;
+  }
+
+  /* Habit buttons */
+  .habit-container {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin: 30px 0;
+  }
+
+  .habit-btn {
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    border: 2px solid #5a6f8f;
+    background-color: #e6e6e6;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .habit-btn.active {
+    background-color: #a9b9d1;
+    box-shadow: 0 0 0 4px #c7d4ea;
+  }
+</style>
+
+ <!-- USER INFO -->
+  <div class="input-group">
+    <label>First Name:</label>
+    <input type="text" value="{{ user.username }}" disabled>
+  </div>
+
+  <div class="input-group">
+    <label>Email:</label>
+    <input type="text" value="{{ user.email }}" disabled>
+  </div>
+
+  <!-- HABITS FORM -->
+  <form method="POST" action="{{ url_for('main.update_habits') }}">
+
+    <div class="habit-container">
+
+      <button type="submit" name="habit" value="alcohol"
+        class="habit-btn {% if user.alcohol %}active{% endif %}">
+        Alcohol
+      </button>
+
+      <button type="submit" name="habit" value="smoking"
+        class="habit-btn {% if user.smoking %}active{% endif %}">
+        Nicotine
+      </button>
+
+      <button type="submit" name="habit" value="narcotics"
+        class="habit-btn {% if user.narcotics %}active{% endif %}">
+        Narcotics
+      </button>
+
+    </div>
+
+  </form>
+
+  <!-- SAVE + PASSWORD -->
+  <button class="main-btn">Save Changes</button>
+
+  <a href="{{ url_for('main.change_password') }}">
+    <button class="main-btn">Change Password</button>
+  </a>
+
+<!-- LOGOUT -->
+  <a href="{{ url_for('main.logout') }}">
+    <button class="main-btn">Log Out</button>
+  </a>
+
 </div>
-<div style="margin-top: 1rem;">
-  <a href="{{ url_for('main.change_password') }}">Change Password</a>
-</div>
+
 {% endblock %}
