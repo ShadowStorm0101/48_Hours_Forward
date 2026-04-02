@@ -1,5 +1,10 @@
 from __future__ import annotations
+
+import csv
+import os
 from typing import List, Optional
+
+from flask import current_app
 
 from . import db
 from sqlalchemy import Integer, String, Float, ForeignKey, Enum, Text, DateTime, Boolean
@@ -53,7 +58,7 @@ class LocationService(db.Model):
     id:Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     lat: Mapped[float] = mapped_column(Float, index=True, nullable=False)
-    lon: Mapped[float] = mapped_column(Float, index=True, nullable=False)
+    lng: Mapped[float] = mapped_column(Float, index=True, nullable=False)
 
     is_alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
     is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -109,3 +114,39 @@ def seed_data():
 
             db.session.add_all([post1, post2, post3, post4])
             db.session.commit()
+
+    if LocationService.query.count() == 0:
+        seed_location_services_from_csv()
+
+
+def seed_location_services_from_csv():
+    csv_path = os.path.join(current_app.root_path,"static","database_data","location_services.csv")
+    with open(csv_path) as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            # Skip empty rows or rows without a name
+            if not row.get("Name"):
+                continue
+
+            try:
+                lat = float(row["Latitude"])
+                lng = float(row["Longitude"])
+                is_alcohol = row.get("IsAlcohol", "0").strip() == "1"
+                is_narcotics = row.get("IsNarcotics", "0").strip() == "1"
+                is_nicotine = row.get("IsNicotine", "0").strip() == "1"
+
+            except ValueError as e:
+                print(f"Skipping row due to conversion error: {row} ({e})")
+                continue
+
+            service = LocationService(
+                name=row["Name"].strip(),
+                lat=lat,
+                lng=lng,
+                is_alcohol=is_alcohol,
+                is_narcotics=is_narcotics,
+                is_nicotine=is_nicotine,
+            )
+
+            db.session.add(service)
+        db.session.commit()

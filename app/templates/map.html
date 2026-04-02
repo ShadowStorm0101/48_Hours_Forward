@@ -12,6 +12,7 @@
 <div id="flex_div">
   <div id="map_div">
       <div id="map"></div>
+      <button onclick="searchArea()">Search this area</button>
   </div>
 
   <div id="services_frame">
@@ -36,9 +37,11 @@ const places = {{ places | tojson }};
 let map;
 let markers = [];
 
-function initMap(centerLat, centerLng) {
+function initMap(centerLat, centerLng, zoom = 12) {
     map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 12,
+        zoom: zoom,
+        streetViewControl: false,
+        mapTypeControl: false,
         center: { lat: centerLat, lng: centerLng }
     });
 
@@ -46,7 +49,7 @@ function initMap(centerLat, centerLng) {
         const marker = new google.maps.Marker({
             position: { lat: place.lat, lng: place.lng },
             map: map,
-            title: place.name
+            title: place.name,
         });
 
         const info = new google.maps.InfoWindow({
@@ -66,14 +69,40 @@ function focusPlace(lat, lng) {
 function loadMap() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            pos => initMap(pos.coords.latitude, pos.coords.longitude),
-            () => initMap(54.9783, -1.6178)
+            pos => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+
+                window.location.href = `/map?lat=${lat}&lng=${lng}`;
+            },
+            () => initMap(54.9783, -1.6178) //newcastle city centre fall back
         );
     } else {
-        initMap(54.9783, -1.6178);
+        initMap(54.9783, -1.6178); //newcastle city centre fall back
     }
 }
 
-loadMap();
+function searchArea(){
+    if (!map) return;
+
+    const center = map.getCenter();
+    const lat = center.lat();
+    const lng = center.lng();
+    const zoom = map.getZoom();
+
+    // reload page with new coords
+    window.location.href = `/map?lat=${lat}&lng=${lng}&zoom=${zoom}`;
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+
+if (urlParams.has("lat") && urlParams.has("lng")) {
+    const lat = parseFloat(urlParams.get("lat"));
+    const lng = parseFloat(urlParams.get("lng"));
+    const zoom = parseInt(urlParams.get("zoom")) || 12;
+    initMap(lat, lng, zoom);
+} else {
+    loadMap(); // fallback to geolocation
+}
 </script>
 {% endblock %}

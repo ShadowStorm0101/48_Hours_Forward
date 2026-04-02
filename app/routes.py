@@ -3,10 +3,11 @@ from datetime import datetime
 from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
+from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from . import db
-from .models import User, Post
+from .models import User, Post, LocationService
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
@@ -155,48 +156,42 @@ def resources():
 @main.route("/map")
 @login_required
 def map():
-    #please ignore the obviously wrong lats and longs its just examples
+    user_lat = request.args.get("lat", type=float)
+    user_lng = request.args.get("lng", type=float)
+
+    R = 6371 #Earths circumference km
+
+    #Haversine formula for distance
+    distance = (
+            R * func.acos(
+        func.cos(func.radians(user_lat)) *
+        func.cos(func.radians(LocationService.lat)) *
+        func.cos(func.radians(LocationService.lng) - func.radians(user_lng)) +
+        func.sin(func.radians(user_lat)) *
+        func.sin(func.radians(LocationService.lat))
+    )
+    ).label("distance")
+
+    services = (
+        db.session.query(LocationService, distance)
+        .order_by(distance)
+        .limit(30)
+        .all()
+    )
+
     places = [
-        {"name": "St James' Park", "lat": 54.975170, "lng": -1.622539,
-         "description": "Home of Newcastle United Football Club."},
-        {"name": "Monument Metro Station", "lat": 54.9737, "lng": -1.6131,
-         "description": "Major Metro interchange in Newcastle city centre."},
-        {"name": "Metrocentre", "lat": 54.956944, "lng": -1.668889,
-         "description": "Large shopping & leisure complex in Gateshead."},
-        {"name": "Angel of the North", "lat": 54.9148, "lng": -1.5890,
-         "description": "Iconic large public sculpture by Antony Gormley."},  # Tyne & Wear
-        {"name": "Hadrian's Wall (Segedunum)", "lat": 54.9943, "lng": -1.4966,
-         "description": "Roman Wall terminus & museum at Wallsend."},  # Wallsend
-        {"name": "Newcastle Castle", "lat": 54.9691, "lng": -1.6175,
-         "description": "Historic castle keep & town walls."},
-        {"name": "Tyne Bridge", "lat": 54.9570, "lng": -1.6054,
-         "description": "Famous arched bridge over the River Tyne."},
-        {"name": "Baltic Centre for Contemporary Art", "lat": 54.9617, "lng": -1.0866,
-         "description": "Contemporary art gallery in Gateshead."},
-        {"name": "Gateshead Millennium Bridge", "lat": 54.9606, "lng": -1.0868,
-         "description": "Tilting pedestrian & cycle bridge."},
-        {"name": "Souter Lighthouse", "lat": 54.9731, "lng": -1.3825,
-         "description": "First purpose-built electric lighthouse, National Trust."},  # South Shields area
-        {"name": "Penshaw Monument", "lat": 54.8964, "lng": -1.3829,
-         "description": "Greek-style monument overlooking Sunderland."},
-        {"name": "Beamish Museum", "lat": 54.8480, "lng": -1.5550,
-         "description": "Living Museum of the North (award‑winning)."},
-        {"name": "Durham Cathedral", "lat": 54.7753, "lng": -1.5763, "description": "UNESCO World Heritage cathedral."},
-        {"name": "Raby Castle", "lat": 54.5775, "lng": -1.7761,
-         "description": "A historic medieval castle and gardens."},
-        {"name": "Alnwick Castle", "lat": 55.4134, "lng": -1.7075,
-         "description": "Castle & gardens featured in films."},
-        {"name": "Bamburgh Castle", "lat": 55.6018, "lng": -1.7096,
-         "description": "Dramatic castle overlooking sandy beach."},
-        {"name": "Kielder Water & Forest Park", "lat": 55.2415, "lng": -2.4495,
-         "description": "Large reservoir & forest park."},
-        {"name": "Northumberland National Park", "lat": 55.2140, "lng": -2.2080,
-         "description": "Vast unspoilt landscapes & Hadrian's Wall areas."},
-        {"name": "Warkworth Castle", "lat": 55.3674, "lng": -1.5859,
-         "description": "Ruined medieval castle above the river."},
-        {"name": "Tynemouth Longsands Beach", "lat": 55.0166, "lng": -1.4258,
-         "description": "Popular sandy beach & coastal town."}
+        {
+            "name": s.LocationService.name,
+            "lat": s.LocationService.lat,
+            "lng": s.LocationService.lng,
+            "is_alcohol": s.LocationService.is_alcohol,
+            "is_narcotics": s.LocationService.is_narcotics,
+            "is_nicotine": s.LocationService.is_nicotine,
+            "distance_km": s.distance
+        }
+        for s in services
     ]
+
     return render_template("map.html",
                            maps_api_key=current_app.config["MAPS_API_KEY"],
                            places = places)
