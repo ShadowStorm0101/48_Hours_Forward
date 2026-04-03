@@ -165,7 +165,6 @@ def update_habits():
         user.narcotics = not user.narcotics
 
     else:
-        flash("Invalid selection.", "error")
         return redirect(url_for("main.profile"))
 
     db.session.commit()

@@ -21,9 +21,7 @@ class User(db.Model):
         default="user",
     )
 
-    # encrypted bio (nullable)
     bio: Mapped[Optional[str]] = mapped_column(String(1200), nullable=True)
-
 
     alcohol: Mapped[bool] = mapped_column(default=False)
     smoking: Mapped[bool] = mapped_column(default=False)
