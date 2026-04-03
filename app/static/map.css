@@ -27,22 +27,25 @@
   }
 
 .services_button {
-    width: 100%;              /* all buttons same width */
-    height: 60px;             /* fixed height for consistency */
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    border-radius: 15px;
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border-radius: 12px;
 
-    flex-shrink: 0;
     display: flex;
-    align-items: center;      /* vertical centering */
-    justify-content: center;  /* horizontal centering */
+    justify-content: space-between; /* pushes left/right apart */
+    align-items: center;
 
-    text-align: center;       /* center text */
-    line-height: 1.2;
-
-    white-space: normal;      /* allow wrapping */
-    overflow: hidden;
-
-    font-size: 14px;
+    text-align: left;
+    gap: 10px;
 }
+
+.services-left{
+    flex:2;
+    text-align: center;
+}
+.services-right{
+    flex:1;
+    text-align: center;
+}
+

@@ -11,7 +11,9 @@
 
 <div id="flex_div">
   <div id="map_div">
+      Filters:
       <div id="map"></div>
+      <button onclick="recenter()">Recenter</button>
       <button onclick="searchArea()">Search this area</button>
   </div>
 
@@ -49,6 +51,7 @@ const places = {{ places | tojson }};
 
 let map;
 let markers = [];
+let centerMarker = null;
 
 function initMap(centerLat, centerLng, zoom = 12) {
     map = new google.maps.Map(document.getElementById("map"), {
@@ -66,11 +69,33 @@ function initMap(centerLat, centerLng, zoom = 12) {
         });
 
         const info = new google.maps.InfoWindow({
-            content: `<strong>${place.name}</strong><br>${place.description || ""}`
+            content: `<strong>${place.name}</strong>`
         });
 
         marker.addListener("click", () => info.open(map, marker));
         markers.push(marker);
+    });
+
+    updateCenterMarker();
+}
+
+function updateCenterMarker() {
+    if (!map) return;
+
+    const center = map.getCenter();
+
+    // remove old marker
+    if (centerMarker) {
+        centerMarker.setMap(null);
+    }
+
+    centerMarker = new google.maps.Marker({
+        position: center,
+        map: map,
+        title: "Search Center",
+        icon: {
+            url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+        }
     });
 }
 
@@ -105,6 +130,13 @@ function searchArea(){
 
     // reload page with new coords
     window.location.href = `/map?lat=${lat}&lng=${lng}&zoom=${zoom}`;
+}
+
+function recenter(){
+    if (!map || !centerMarker) return;
+
+    const pos = centerMarker.getPosition(); // google.maps.LatLng
+    map.panTo(pos);
 }
 
 const urlParams = new URLSearchParams(window.location.search);

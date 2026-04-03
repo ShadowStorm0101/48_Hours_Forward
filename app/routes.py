@@ -158,6 +158,9 @@ def resources():
 def map():
     user_lat = request.args.get("lat", type=float)
     user_lng = request.args.get("lng", type=float)
+    if (user_lat == None or user_lng == None):
+        user_lat = 54.9783
+        user_lng = -1.6178
 
     R = 6371 #Earths circumference km
 
@@ -175,7 +178,7 @@ def map():
     services = (
         db.session.query(LocationService, distance)
         .order_by(distance)
-        .limit(30)
+        .limit(15)
         .all()
     )
 
