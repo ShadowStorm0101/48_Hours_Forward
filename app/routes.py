@@ -32,11 +32,9 @@ def _current_user() -> User | None:
 
 @main.route("/")
 def home():
-    # If already logged in, skip landing page
     if session.get("user_id"):
         return redirect(url_for("main.dashboard"))
-    else:
-        return render_template("index.html")
+    return render_template("index.html")
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
@@ -56,10 +54,12 @@ def register():
             bio = validate_bio(raw_bio)
         except ValueError as e:
             flash(str(e), "error")
-            security_logger.warning("REGISTER FAILED at %s ip=%s email=%r reason=%s", ts, ip, raw_email, str(e))
+            security_logger.warning(
+                "REGISTER FAILED at %s ip=%s email=%r reason=%s",
+                ts, ip, raw_email, str(e)
+            )
             return render_template("register.html")
 
-        # uniqueness checks
         if User.query.filter_by(email=email).first():
             flash("Email already registered. Please log in.", "error")
             return redirect(url_for("main.login"))
@@ -69,17 +69,25 @@ def register():
             return render_template("register.html")
 
         safe_bio = sanitize_html(bio) if bio else ""
-        encrypted_bio = encrypt_bio(safe_bio, current_app.config["BIO_ENCRYPTION_KEY"]) if safe_bio else None
+        encrypted_bio = encrypt_bio(
+            safe_bio,
+            current_app.config["BIO_ENCRYPTION_KEY"]
+        ) if safe_bio else None
 
-        pepper = current_app.config["PASSWORD_PEPPER"]
-        pw_hash = hash_password(password, pepper)
+        pw_hash = hash_password(password, current_app.config["PASSWORD_PEPPER"])
 
-        user = User(username=public_username, email=email, password=pw_hash, role="user", bio=encrypted_bio)
+        user = User(
+            username=public_username,
+            email=email,
+            password=pw_hash,
+            role="user",
+            bio=encrypted_bio
+        )
+
         db.session.add(user)
         db.session.commit()
 
         flash("Registration successful. Please log in.", "success")
-        security_logger.info("REGISTER SUCCESS at %s ip=%s user_id=%s username=%r", ts, ip, user.id, user.username)
         return redirect(url_for("main.login"))
 
     return render_template("register.html")
@@ -90,29 +98,23 @@ def login():
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
 
-        ip = request.remote_addr or "unknown"
-        ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-
         if not raw_email or not raw_password:
             flash("Please enter both email and password.", "error")
             return render_template("login.html")
 
         user = User.query.filter_by(email=raw_email.strip()).first()
 
-        if user and verify_password(raw_password.strip(), user.password, current_app.config["PASSWORD_PEPPER"]):
+        if user and verify_password(
+            raw_password.strip(),
+            user.password,
+            current_app.config["PASSWORD_PEPPER"]
+        ):
             session["user_id"] = user.id
             session["role"] = user.role
             flash(f"Logged in as {user.username}", "success")
-
-            current_app.logger.info(
-                "LOGIN SUCCESS at %s ip=%s user_id=%s username=%r role=%s",
-                ts, ip, user.id, user.username, user.role
-            )
             return redirect(url_for("main.dashboard"))
 
         flash("Invalid email or password.", "error")
-        current_app.logger.warning("LOGIN FAILED at %s ip=%s email=%r", ts, ip, raw_email)
-        return render_template("login.html")
 
     return render_template("login.html")
 
@@ -120,11 +122,7 @@ def login():
 @login_required
 def dashboard():
     user = _current_user()
-    if not user:
-        flash("Please log in first.", "error")
-        return redirect(url_for("main.login"))
 
-    # Optional: load posts (safe default)
     posts = (
         Post.query.options(joinedload(Post.author))
         .order_by(Post.created_at.desc())
@@ -132,30 +130,7 @@ def dashboard():
         .all()
     )
 
-    # Your dashboard.html currently only uses role, but keeping posts ready is useful later.
     return render_template("dashboard.html", role=user.role, posts=posts, user=user)
-
-@main.route("/logout")
-@login_required
-def logout():
-    session.clear()
-    flash("Logged out.", "success")
-    return redirect(url_for("main.login"))
-
-@main.route("/journal")
-@login_required
-def journal():
-    return render_template("journal.html")
-
-@main.route("/resources")
-@login_required
-def resources():
-    return render_template("resources.html")
-
-@main.route("/map")
-@login_required
-def map():
-    return render_template("map.html")
 
 @main.route("/profile")
 @login_required
@@ -168,6 +143,7 @@ def profile():
 
     return render_template("profile.html", user=user)
 
+
 @main.route("/update-habits", methods=["POST"])
 @login_required
 def update_habits():
@@ -177,42 +153,63 @@ def update_habits():
         flash("User not found", "error")
         return redirect(url_for("main.login"))
 
-    habit = request.form.getlist("habit")
+    habit = request.form.get("habit")
 
-    # Reset all
-    user.alcohol = False
-    user.smoking = False
-    user.narcotics = False
+    if habit == "alcohol":
+        user.alcohol = not user.alcohol
 
-    # Apply choices
-    if "alcohol" in habit:
-        user.alcohol = True
-    if "smoking" in habit:
-        user.smoking = True
-    if "narcotics" in habit:
-        user.narcotics = True
+    elif habit == "smoking":
+        user.smoking = not user.smoking
+
+    elif habit == "narcotics":
+        user.narcotics = not user.narcotics
+
+    else:
+        flash("Invalid selection.", "error")
+        return redirect(url_for("main.profile"))
 
     db.session.commit()
 
-    flash("Preferences updated!", "success")
+    flash(f"{habit.capitalize()} updated!", "success")
     return redirect(url_for("main.profile"))
+
+@main.route("/journal")
+@login_required
+def journal():
+    return render_template("journal.html")
+
+
+@main.route("/resources")
+@login_required
+def resources():
+    return render_template("resources.html")
+
+
+@main.route("/map")
+@login_required
+def map():
+    return render_template("map.html")
+
 
 @main.route("/help")
 @login_required
 def help():
     return render_template("help.html")
 
+@main.route("/logout")
+@login_required
+def logout():
+    session.clear()
+    flash("Logged out.", "success")
+    return redirect(url_for("main.login"))
+
+
 def require_login():
-    # Logged in if user_id exists
     if "user_id" not in session:
         return redirect(url_for("main.login"))
     return None
 
 
-
-
-
-# SQL injection and invalid inputs. 
 @main.route("/change-password", methods=["GET", "POST"])
 def change_password():
     resp = require_login()
@@ -220,10 +217,8 @@ def change_password():
         flash("Please log in first.", "error")
         return resp
 
-    user_id = session.get("user_id")
-    role = session.get("role", "user")
+    user = User.query.get(session.get("user_id"))
 
-    user = User.query.get(user_id)
     if not user:
         session.clear()
         flash("Session expired. Please log in again.", "error")
@@ -238,7 +233,6 @@ def change_password():
             return render_template("change_password.html")
 
         try:
-            # Validate new password strength (don’t validate current with strength rules)
             new_password = validate_password(raw_new_password, username=user.email)
         except ValueError as e:
             flash(str(e), "error")
@@ -246,28 +240,16 @@ def change_password():
 
         pepper = current_app.config["PASSWORD_PEPPER"]
 
-        # Verify current password against stored hash
         if not verify_password(raw_current_password, user.password, pepper):
             flash("Current password is incorrect.", "error")
             return render_template("change_password.html")
 
-        # Prevent reusing same password
         if verify_password(new_password, user.password, pepper):
-            flash("New password must be different from your current password.", "error")
+            flash("New password must be different.", "error")
             return render_template("change_password.html")
 
-        # Save new hash
         user.password = hash_password(new_password, pepper)
         db.session.commit()
-
-        security_logger.info(
-            "PASSWORD CHANGE SUCCESS user_id=%s username=%r ip=%s",
-            user.id, user.username, request.remote_addr
-        )
-
-        # Keep session consistent (don’t clear it)
-        session["user_id"] = user.id
-        session["role"] = user.role
 
         flash("Password changed successfully.", "success")
         return redirect(url_for("main.dashboard"))
