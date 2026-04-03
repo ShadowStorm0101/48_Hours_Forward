@@ -24,6 +24,11 @@ class User(db.Model):
     # encrypted bio (nullable)
     bio: Mapped[Optional[str]] = mapped_column(String(1200), nullable=True)
 
+
+    alcohol: Mapped[bool] = mapped_column(default=False)
+    smoking: Mapped[bool] = mapped_column(default=False)
+    narcotics: Mapped[bool] = mapped_column(default=False)
+
     posts: Mapped[List["Post"]] = relationship(
         "Post",
         back_populates="author",
@@ -32,7 +37,6 @@ class User(db.Model):
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
-
 
 class Post(db.Model):
     __tablename__ = "posts"
