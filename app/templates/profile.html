@@ -23,161 +23,80 @@
   <p><strong>Email:</strong> {{ user.email }}</p>
 </div>
 
-<!-- HABIT CARDS -->
+<!-- HABITS -->
 <form method="POST" action="{{ url_for('main.update_habits') }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-  <div class="habit-grid">
+  <div class="habit-container">
 
-    <!-- Alcohol -->
     <button type="submit" name="habit" value="alcohol"
-      class="habit-card {% if user.alcohol %}active{% endif %}">
-
-      <div class="habit-content">
-        <h3>Alcohol</h3>
-      </div>
-
-      {% if user.alcohol %}
-      <div class="menu" onclick="event.stopPropagation();">
-        ⋮
-        <div class="dropdown">
-          <p>Remove addiction</p>
-          <p>Mark as overcome</p>
-        </div>
-      </div>
-      {% endif %}
+      class="habit-btn {% if user.alcohol %}active{% endif %}">
+      Alcohol
     </button>
 
-    <!-- Nicotine -->
     <button type="submit" name="habit" value="smoking"
-      class="habit-card {% if user.smoking %}active{% endif %}">
-
-      <div class="habit-content">
-        <h3>Nicotine</h3>
-      </div>
-
-      {% if user.smoking %}
-      <div class="menu" onclick="event.stopPropagation();">
-        ⋮
-        <div class="dropdown">
-          <p>Remove addiction</p>
-          <p>Mark as overcome</p>
-        </div>
-      </div>
-      {% endif %}
+      class="habit-btn {% if user.smoking %}active{% endif %}">
+      Nicotine
     </button>
 
-    <!-- Narcotics -->
     <button type="submit" name="habit" value="narcotics"
-      class="habit-card {% if user.narcotics %}active{% endif %}">
-
-      <div class="habit-content">
-        <h3>Narcotics</h3>
-      </div>
-
-      {% if user.narcotics %}
-      <div class="menu" onclick="event.stopPropagation();">
-        ⋮
-        <div class="dropdown">
-          <p>Remove addiction</p>
-          <p>Mark as overcome</p>
-        </div>
-      </div>
-      {% endif %}
+      class="habit-btn {% if user.narcotics %}active{% endif %}">
+      Narcotics
     </button>
 
   </div>
 </form>
 
-<!-- ACTION BUTTONS -->
+<!-- ACTIONS -->
 <div style="display:flex; flex-direction:column; gap:15px; align-items:center; margin-top:30px;">
 
   <a href="{{ url_for('main.change_password') }}">
-    <button class="nav-item">Change Password</button>
+    <button class="main-btn">Change Password</button>
   </a>
 
   <a href="{{ url_for('main.logout') }}">
-    <button class="nav-item">Log Out</button>
+    <button class="main-btn">Log Out</button>
   </a>
 
 </div>
 
-<!-- PAGE-SPECIFIC STYLES -->
+<!-- STYLES -->
 <style>
-.habit-grid {
+.habit-container {
   display: flex;
-  gap: 30px;
   justify-content: center;
-  margin-top: 40px;
+  gap: 25px;
+  margin: 30px 0;
 }
 
-.habit-card {
-  width: 310px;
-  height: 380px;
-  border-radius: 10px;
-  border: none;
-  background: #ffffff;
+.habit-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 15px;
+  border: 2px solid #5a6f8f;
+  background-color: #e6e6e6;
   cursor: pointer;
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   transition: all 0.25s ease;
-}
-
-.habit-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
-}
-
-.habit-card.active {
-  background: #1a1a1a;
-  color: #ffffff;
-  transform: scale(1.03);
-}
-
-.habit-content h3 {
-  font-size: 22px;
-  margin: 0;
-}
-
-/* 3-dot menu */
-.menu {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  font-size: 22px;
-}
-
-/* dropdown */
-.dropdown {
-  display: none;
-  position: absolute;
-  top: 30px;
-  right: 0;
-  background: white;
-  color: black;
-  border-radius: 6px;
-  padding: 10px;
-  min-width: 160px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.menu:hover .dropdown {
-  display: block;
-}
-
-.dropdown p {
-  margin: 6px 0;
-  cursor: pointer;
   font-size: 14px;
 }
 
-.dropdown p:hover {
-  color: #007bff;
+.habit-btn:hover {
+  transform: scale(1.05);
+}
+
+.habit-btn.active {
+  background-color: #a9b9d1;
+  box-shadow: 0 0 0 4px #c7d4ea;
+  transform: scale(1.1);
+}
+
+.main-btn {
+  padding: 12px 40px;
+  border-radius: 25px;
+  border: 1px solid #5a6f8f;
+  background-color: #e6e6e6;
+  cursor: pointer;
+  font-size: 16px;
 }
 </style>
 
