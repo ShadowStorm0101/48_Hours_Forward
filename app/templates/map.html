@@ -20,7 +20,20 @@
       {% for place in places %}
       <button class="services_button"
           onclick="focusPlace({{ place.lat }}, {{ place.lng }})">
-          {{ place.name }}
+
+        <div class="services-left">
+            <strong>{{ place.name }}</strong><br>
+        </div>
+
+        <div class="services-right">
+            {{ "%.2f"|format(place.distance_km) }} km<br>
+            <div class="services-addiction-type">
+                {% if place.is_alcohol %} 🍺 {% endif %}
+            {% if place.is_narcotics %} 💊 {% endif %}
+            {% if place.is_nicotine %} 🚬 {% endif %}
+            </div>
+        </div>
+
       </button>
       {% endfor %}
   </div>
