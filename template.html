@@ -5,8 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page Title</title>
   <link rel="stylesheet" href="global.css">
-  </head>
+</head>
 <body>
+  <script>
+    // check local storage high contrast preference and apply
+    if (localStorage.getItem('highContrast') === 'true') {
+      document.body.classList.add('high-contrast');
+    }
+  </script>
 
   <nav class="navbar">
     <div class="nav-item">Journal</div>

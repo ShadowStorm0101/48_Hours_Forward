@@ -1,7 +1,144 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help & Support</title>
+  <link rel="stylesheet" href="../static/global.css">
+  <link rel="stylesheet" href="../static/help.css">
+</head>
+<body>
+  <script>
+    // check local storage high contrast preference and apply
+    if (localStorage.getItem('highContrast') === 'true') {
+      document.body.classList.add('high-contrast');
+    }
+  </script>
 
-{% block title %}Help{% endblock %}
+  <nav class="navbar">
+    <div class="nav-item"><a href="journal.html">Journal</a></div>
+    <div class="nav-item"><a href="dashboard.html">Dashboard</a></div>
+    <div class="nav-item"><a href="resources.html">Resources</a></div>
+    <div class="nav-item"><a href="map.html">Map</a></div>
+    <div class="nav-item"><a href="profile.html">Profile</a></div>
+    <div class="nav-item active"><a href="help.html">Help</a></div>
+  </nav>
 
-{% block content %}
-<h1>Help Page</h1>
-{% endblock %}
+  <div class="container" style="text-align: center;">
+    <h1 class="page-title" style="margin-top: 0; padding-top: 20px;">Help & Support</h1>
+  </div>
+  
+  <div class="container" style="flex-direction: column; width: 100%; max-width: 800px; margin: 0 auto;">
+    <!-- Accessibility Options -->
+    <div class="help-section">
+      <h2>Accessibility</h2>
+      <p>Enhance the readability of the platform by toggling high contrast mode.</p>
+      <button id="high-contrast-toggle" class="btn">Toggle High Contrast Mode</button>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="help-section">
+      <h2>Frequently Asked Questions</h2>
+      <details>
+        <summary>Who are we?</summary>
+        <p>We are a group of Newcastle University Comptuer Science Students who made this application as a part of our team project coursework</p>
+      </details>
+      <details>
+        <summary>About the website</summary>
+        <p>This website is to support people with drug or alchohol addictions to become sober and heal permanently.</p>
+      </details>
+      <details>
+        <summary>Is my data secure?</summary>
+        <p>Yes, we use advanced encryption to ensure your personal data remain private and secure.</p>
+      </details>
+    </div>
+
+    <!-- Bug Report Section -->
+    <div class="help-section">
+      <h2>Report a Bug</h2>
+      <form id="bug-form" action="https://formspree.io/f/meepkzad" method="POST" class="help-form">
+        <label for="bug-title">Issue Title:</label>
+        <input type="text" id="bug-title" name="bug-title" placeholder="Brief description of the issue" required>
+        
+        <label for="bug-desc">Description & Steps to Reproduce:</label>
+        <textarea id="bug-desc" name="bug-desc" rows="4" placeholder="Detailed description..." required></textarea>
+        
+        <button type="submit" class="btn">Submit Bug Report</button>
+        <p id="bug-status" style="display: none; color: green; margin-top: 10px; font-weight: bold;"></p>
+      </form>
+    </div>
+
+    <!-- Contact Us Section -->
+    <div class="help-section">
+      <h2>Contact Us</h2>
+      <form id="contact-form" action="https://formspree.io/f/mykbjpel" method="POST" class="help-form">
+        <label for="contact-name">Name:</label>
+        <input type="text" id="contact-name" name="contact-name" required>
+        
+        <label for="contact-email">Email:</label>
+        <input type="email" id="contact-email" name="contact-email" required>
+        
+        <label for="contact-message">Message:</label>
+        <textarea id="contact-message" name="contact-message" rows="4" required></textarea>
+        
+        <button type="submit" class="btn">Send Message</button>
+        <p id="contact-status" style="display: none; color: green; margin-top: 10px; font-weight: bold;"></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Making sure that the submit buttons on the forms do not go onto formspree website and stays on the help page
+    async function handleFormSubmit(event, statusElementId) {
+      event.preventDefault();
+      const form = event.target;
+      const statusElement = document.getElementById(statusElementId);
+      const data = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: data,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          form.reset();
+          statusElement.textContent = "Successfully submitted!";
+          statusElement.style.color = "green";
+          statusElement.style.display = "block";
+        } else {
+          statusElement.textContent = "Oops! There was a problem submitting your form.";
+          statusElement.style.color = "red";
+          statusElement.style.display = "block";
+        }
+      } catch (error) {
+        statusElement.textContent = "Oops! There was a problem submitting your form.";
+        statusElement.style.color = "red";
+        statusElement.style.display = "block";
+      }
+
+      // Hide the message after 3 seconds
+      setTimeout(() => {
+        statusElement.style.display = "none";
+      }, 3000);
+    }
+
+    // Attach handlers to forms
+    document.getElementById("bug-form").addEventListener("submit", (e) => handleFormSubmit(e, "bug-status"));
+    document.getElementById("contact-form").addEventListener("submit", (e) => handleFormSubmit(e, "contact-status"));
+
+    // High Contrast Mode Toggle
+    const toggleBtn = document.getElementById('high-contrast-toggle');
+
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('high-contrast');
+      const isHighContrast = document.body.classList.contains('high-contrast');
+      localStorage.setItem('highContrast', isHighContrast);
+    });
+  </script>
+  
+</body>
+</html>
