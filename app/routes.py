@@ -226,7 +226,12 @@ def update_habits():
 @login_required
 def reset():
     user = _current_user()
-    reset_counter(user)             # calls function to set datetime to now
+
+    #### If in the dashboard the addiction selected = *addiction type then*
+    # user.alcohol_streak_start_streak_start = datetime.utcnow()
+    # user.nicotine_streak_start = datetime.utcnow()
+    # user.narcotics_streak_start = datetime.utcnow()             # calls function to set datetime to now
+
     db.session.commit()             # commit to db
     return redirect(url_for("main.dashboard"))
 
