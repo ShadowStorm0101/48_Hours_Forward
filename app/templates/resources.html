@@ -22,10 +22,15 @@
       <button class="scroll-btn">&lt;</button>
 
       <div class="resource-row">
-        <a href="#" class="resource-card">AA Meeting Local</a>
-        <a href="#" class="resource-card">Hotline</a>
-        <a href="#" class="resource-card">Emergency Hotline</a>
-        <a href="#" class="resource-card">Example 1</a>
+          <a href="#" class="resource-card">AA Meeting Local</a>
+          <a href="#" class="resource-card">Hotline</a>
+          <a href="#" class="resource-card">Emergency Hotline</a>
+          <a href="#" class="resource-card">Example 1</a>
+          <a href="#" class="resource-card">Example 2</a>
+          <a href="#" class="resource-card">Example 3</a>
+          <a href="#" class="resource-card">Example 4</a>
+          <a href="#" class="resource-card">Example 5</a>
+          <a href="#" class="resource-card">Example 6</a>
       </div>
 
       <button class="scroll-btn">&gt;</button>
@@ -34,4 +39,32 @@
   </section>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+// get all scroll buttons + rows
+const rows = document.querySelectorAll(".resource-row");
+const buttons = document.querySelectorAll(".scroll-btn");
+
+// loop through each row
+rows.forEach((row, index) => {
+
+    const leftBtn = buttons[index * 2];
+    const rightBtn = buttons[index * 2 + 1];
+
+    // scroll left
+    leftBtn.addEventListener("click", () => {
+        row.scrollBy({ left: -200, behavior: "smooth" });
+    });
+
+    // scroll right
+    rightBtn.addEventListener("click", () => {
+        row.scrollBy({ left: 200, behavior: "smooth" });
+    });
+
+});
+
+</script>
 {% endblock %}
