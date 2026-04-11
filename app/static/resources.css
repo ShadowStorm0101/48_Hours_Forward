@@ -1,0 +1,112 @@
+/* Page layout */
+.resources-page {
+  margin-top: 20px;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* Section spacing */
+.resource-section {
+  margin-bottom: 40px;
+}
+
+/* Section heading (Alcohol / Nicotine / Narcotics) */
+.resource-heading-wrap {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.resource-heading {
+  display: inline-block;
+  padding: 4px 24px;
+  border: 1px solid #5a6f8f;
+  background-color: #efefef;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Row container (arrows + scroll area) */
+.resource-row-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Left / right scroll buttons */
+.scroll-btn {
+  width: 42px;
+  height: 82px;
+  border-radius: 18px;
+  border: 1px solid #5a6f8f;
+  background-color: #efefef;
+  cursor: pointer;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.scroll-btn:hover {
+  background-color: #dfe7f5;
+}
+
+/* Scrollable row */
+.resource-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 14px 16px;
+  border: 1px solid #5a6f8f;
+  border-radius: 20px;
+  background-color: #f6f6f6;
+  width: 100%;
+  max-width: 900px;
+
+  /* Hide scrollbar */
+  scrollbar-width: none;
+}
+
+.resource-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Individual resource cards */
+.resource-card {
+  min-width: 110px;
+  height: 110px;
+  border: 1px solid #5a6f8f;
+  border-radius: 16px;
+  background-color: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+  text-decoration: none;
+  color: #111;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.resource-card:hover {
+  background-color: #dfe7f5;
+  color: #111;
+}
+
+/* High contrast mode support */
+body.high-contrast .resource-heading,
+body.high-contrast .scroll-btn,
+body.high-contrast .resource-row,
+body.high-contrast .resource-card {
+  background-color: #222;
+  border-color: #fff;
+  color: #fff;
+}
+
+body.high-contrast .resource-card:hover {
+  background-color: #333;
+}
