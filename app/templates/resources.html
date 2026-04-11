@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="stylesheet" href="../static/global.css">
 <link rel="stylesheet" href="../static/resources.css">
 {% endblock %}
 
@@ -9,6 +8,30 @@
 
 {% block content %}
 <div class="resources-page">
+
   <h1 class="page-title">Resources</h1>
+
+  <section class="resource-section">
+
+    <div class="resource-heading-wrap">
+      <h2 class="resource-heading">Alcohol</h2>
+    </div>
+
+    <div class="resource-row-wrap">
+
+      <button class="scroll-btn">&lt;</button>
+
+      <div class="resource-row">
+        <a href="#" class="resource-card">AA Meeting Local</a>
+        <a href="#" class="resource-card">Hotline</a>
+        <a href="#" class="resource-card">Emergency Hotline</a>
+        <a href="#" class="resource-card">Example 1</a>
+      </div>
+
+      <button class="scroll-btn">&gt;</button>
+
+    </div>
+  </section>
+
 </div>
 {% endblock %}
