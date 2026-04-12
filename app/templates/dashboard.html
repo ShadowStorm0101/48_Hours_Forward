@@ -14,33 +14,83 @@
   {% endif %}
 {% endwith %}
 
+{% if edit %}
 
+  <div class="dashboard-box">
+    <h3>Update Habits</h3>
 
-<div class="dashboard-box">
-  <p>Tracking:</p>
+    <form method="POST" action="{{ url_for('main.update_habits') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-  <ul>
-    {% if user.alcohol_streak_start is not none %}
-      <li>
-        Alcohol<br>
-        Current streak: {{ current_alcohol_streak }} days
-      </li>
-    {% endif %}
+      <label>
+        <input
+          type="checkbox"
+          name="habits"
+          value="alcohol"
+          {% if user.alcohol_streak_start is not none %}checked{% endif %}
+        >
+        Alcohol
+      </label>
 
-    {% if user.nicotine_streak_start is not none %}
-      <li>
-        Nicotine<br>
-        Current streak: {{ current_nicotine_streak }} days
-      </li>
-    {% endif %}
+      <label>
+        <input
+          type="checkbox"
+          name="habits"
+          value="nicotine"
+          {% if user.nicotine_streak_start is not none %}checked{% endif %}
+        >
+        Nicotine
+      </label>
 
-    {% if user.narcotics_streak_start is not none %}
-      <li>
-        Narcotics<br>
-        Current streak: {{ current_narcotics_streak }} days
-      </li>
-    {% endif %}
-  </ul>
-</div>
+      <label>
+        <input
+          type="checkbox"
+          name="habits"
+          value="narcotics"
+          {% if user.narcotics_streak_start is not none %}checked{% endif %}
+        >
+        Narcotics
+      </label>
+
+      <button type="submit" onclick="return confirm('Are you sure you want to update your habits? This will reset your changed streaks.')">
+        Save
+      </button>
+    </form>
+
+    <a href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+  </div>
+
+{% else %}
+
+  <div class="dashboard-box">
+    <h3>Tracking</h3>
+
+    <ul>
+      {% if user.alcohol_streak_start is not none %}
+        <li>
+          Alcohol<br>
+          Current streak: {{ current_alcohol_streak }}
+        </li>
+      {% endif %}
+
+      {% if user.nicotine_streak_start is not none %}
+        <li>
+          Nicotine<br>
+          Current streak: {{ current_nicotine_streak }}
+        </li>
+      {% endif %}
+
+      {% if user.narcotics_streak_start is not none %}
+        <li>
+          Narcotics<br>
+          Current streak: {{ current_narcotics_streak }}
+        </li>
+      {% endif %}
+    </ul>
+
+    <a href="{{ url_for('main.dashboard', edit='true') }}">Update Habits</a>
+  </div>
+
+{% endif %}
 
 {% endblock %}

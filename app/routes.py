@@ -31,6 +31,21 @@ def _current_user() -> User | None:
         return None
     return User.query.get(uid)
 
+# calculate days/months etc of delta
+def get_delta(delta):
+    days = delta.days
+    hours = delta.seconds // 3600
+    minutes = (delta.seconds % 3600) // 60
+
+    years = days // 365
+    months = (days % 365) // 30
+    remaining_days = (days % 365) % 30
+
+    current_narcotics_streak = f"{years} years  {months} months  {remaining_days} days  {hours} hours  {minutes} minutes"
+
+    return current_narcotics_streak
+
+
 @main.route("/")
 def home():
     # If already logged in, skip landing page
@@ -69,9 +84,9 @@ def register():
 
 
         pepper = current_app.config["PASSWORD_PEPPER"]
-        pw_hash = hash_password(password, pepper)
+        password_hash = hash_password(password, pepper)
 
-        user = User(username=public_username, email=email, password=pw_hash, role="user")
+        user = User(username=public_username, email=email, password_hash=password_hash, role="user", alcohol_streak_start=None, narcotics_streak_start=None, nicotine_streak_start=None)
         db.session.add(user)
         db.session.commit()
 
@@ -96,7 +111,7 @@ def login():
 
         user = User.query.filter_by(email=raw_email.strip()).first()
 
-        if user and verify_password(raw_password.strip(), user.password, current_app.config["PASSWORD_PEPPER"]):
+        if user and verify_password(raw_password.strip(), user.password_hash, current_app.config["PASSWORD_PEPPER"]):
             session["user_id"] = user.id
             session["role"] = user.role
             flash(f"Logged in as {user.username}", "success")
@@ -122,21 +137,27 @@ def dashboard():
         return redirect(url_for("main.login"))
 
 
+
     # Calculating streak, now minus streak start
     if user.alcohol_streak_start is not None:
-        current_alcohol_streak = (datetime.utcnow() - user.alcohol_streak_start).days
+        delta = datetime.utcnow() - user.alcohol_streak_start
+        current_alcohol_streak = get_delta(delta)
     else:
         current_alcohol_streak = None
 
-    if user.user.nicotine_streak_start is not None:
-        current_nicotine_streak = (datetime.utcnow() - user.nicotine_streak_start).days
+    if user.nicotine_streak_start is not None:
+        delta = datetime.utcnow() - user.nicotine_streak_start
+        current_nicotine_streak = get_delta(delta)
     else:
         current_nicotine_streak = None
 
     if user.narcotics_streak_start is not None:
-        current_narcotics_streak = (datetime.utcnow() - user.narcotics_streak_start).days
+        delta = datetime.utcnow() - user.narcotics_streak_start
+        current_narcotics_streak = get_delta(delta)
     else:
         current_narcotics_streak = None
+
+    edit = request.args.get("edit")
 
 
     # Your dashboard.html currently only uses role, but keeping posts ready is useful later. *What does this mean-zak*
@@ -146,7 +167,8 @@ def dashboard():
         user=user,
         current_alcohol_streak=current_alcohol_streak,
         current_nicotine_streak=current_nicotine_streak,
-        current_narcotics_streak=current_narcotics_streak
+        current_narcotics_streak=current_narcotics_streak,
+        edit=edit
     )
 
 @main.route("/logout")
@@ -192,8 +214,9 @@ def update_habits():
         return redirect(url_for("main.login"))
 
     selected = request.form.getlist("habits")
+    print("selected habits:", selected)
 
-    # Apply choices, Also need to call function to start addiction time, reset_counter(user) from dashboard.py
+    # Apply choices, Also need to call function to start addiction time
     if "alcohol" in selected:
         if user.alcohol_streak_start is None:
             user.alcohol_streak_start = datetime.utcnow()
@@ -212,15 +235,12 @@ def update_habits():
     else:
         user.narcotics_streak_start = None
 
-    # Do you want to submit these changes? yes/no handled by dashboard.html, to do later
-
-
     db.session.commit()
 
     flash("Preferences updated!", "success")
 
 
-    return redirect(url_for("main.profile"))
+    return redirect(url_for("main.dashboard"))
 
 @main.route("/reset")
 @login_required

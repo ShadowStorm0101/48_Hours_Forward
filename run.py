@@ -5,7 +5,7 @@ app = create_app()
 
 with app.app_context():
     db.create_all()
-    seed_data()
+    # removed seed data function from here
 
 if __name__ == "__main__":
     app.run(debug=True)
