@@ -3,10 +3,11 @@ from datetime import datetime
 from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
+from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from . import db
-from .models import User, Post
+from .models import User, Post, LocationService
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
@@ -155,7 +156,48 @@ def resources():
 @main.route("/map")
 @login_required
 def map():
-    return render_template("map.html")
+    user_lat = request.args.get("lat", type=float)
+    user_lng = request.args.get("lng", type=float)
+    if (user_lat == None or user_lng == None):
+        user_lat = 54.9783
+        user_lng = -1.6178
+
+    R = 6371 #Earths circumference km
+
+    #Haversine formula for distance
+    distance = (
+            R * func.acos(
+        func.cos(func.radians(user_lat)) *
+        func.cos(func.radians(LocationService.lat)) *
+        func.cos(func.radians(LocationService.lng) - func.radians(user_lng)) +
+        func.sin(func.radians(user_lat)) *
+        func.sin(func.radians(LocationService.lat))
+    )
+    ).label("distance")
+
+    services = (
+        db.session.query(LocationService, distance)
+        .order_by(distance)
+        .limit(15)
+        .all()
+    )
+
+    places = [
+        {
+            "name": s.LocationService.name,
+            "lat": s.LocationService.lat,
+            "lng": s.LocationService.lng,
+            "is_alcohol": s.LocationService.is_alcohol,
+            "is_narcotics": s.LocationService.is_narcotics,
+            "is_nicotine": s.LocationService.is_nicotine,
+            "distance_km": s.distance
+        }
+        for s in services
+    ]
+
+    return render_template("map.html",
+                           maps_api_key=current_app.config["MAPS_API_KEY"],
+                           places = places)
 
 @main.route("/profile")
 @login_required
