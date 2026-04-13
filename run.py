@@ -1,5 +1,7 @@
 from app import create_app, db
 from app.models import seed_data
+from dotenv import load_dotenv
+load_dotenv()
 
 app = create_app()
 
