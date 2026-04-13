@@ -1,9 +1,8 @@
-
 from __future__ import annotations
 from typing import List, Optional
 
 from . import db
-from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime
+from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -21,8 +20,14 @@ class User(db.Model):
         default="user",
     )
 
-    # encrypted bio (nullable)
     bio: Mapped[Optional[str]] = mapped_column(String(1200), nullable=True)
+
+    alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
+    smoking: Mapped[bool] = mapped_column(Boolean, default=False)
+    narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
+    verification_code: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
+    verification_expiry: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
     posts: Mapped[List["Post"]] = relationship(
         "Post",
@@ -46,12 +51,8 @@ class Post(db.Model):
     author_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     author: Mapped["User"] = relationship("User", back_populates="posts")
 
-    def __repr__(self) -> str:
-        return f"Post(id={self.id!r}, title={self.title!r}, author_id={self.author_id!r})"
-
 
 def seed_data():
-    """Populate sample users and posts (called from reset_db.py / run.py)."""
     from flask import current_app
     from .utils.encryption import hash_password
 
@@ -63,40 +64,16 @@ def seed_data():
             email="admin@example.com",
             password=hash_password("Admin123!AAA", pepper),
             role="admin",
-            bio=None,
+            is_verified=True
         )
-        moderator = User(
-            username="mod1",
-            email="mod1@example.com",
-            password=hash_password("Mod123!AAAA1", pepper),
-            role="moderator",
-            bio=None,
-        )
+
         user1 = User(
             username="user1",
             email="user1@example.com",
             password=hash_password("User123!AAAA1", pepper),
             role="user",
-            bio=None,
-        )
-        user2 = User(
-            username="user2",
-            email="user2@example.com",
-            password=hash_password("User456!AAAA1", pepper),
-            role="user",
-            bio=None,
+            is_verified=True
         )
 
-        db.session.add_all([admin, moderator, user1, user2])
+        db.session.add_all([admin, user1])
         db.session.commit()
-
-    if Post.query.count() == 0:
-        users = User.query.order_by(User.id).all()
-        if len(users) >= 4:
-            post1 = Post(title="Welcome Post", content="This is the first post.", author_id=users[0].id)
-            post2 = Post(title="Moderator Update", content="Moderator insights here.", author_id=users[1].id)
-            post3 = Post(title="User Thoughts", content="User1 shares ideas.", author_id=users[2].id)
-            post4 = Post(title="Another User Post", content="User2 contributes.", author_id=users[3].id)
-
-            db.session.add_all([post1, post2, post3, post4])
-            db.session.commit()
