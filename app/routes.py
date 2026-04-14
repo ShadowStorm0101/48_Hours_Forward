@@ -7,11 +7,11 @@ from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from . import db
-<<<<<<< HEAD
-from .models import User, Post, LocationService
-=======
+
+from .models import User, LocationService
+
 from .models import User
->>>>>>> feature/dashboard-access-control
+
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio

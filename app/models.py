@@ -133,6 +133,7 @@ def seed_location_services_from_csv():
             db.session.add(service)
         db.session.commit()
 
-if LocationService.query.count() == 0:
-    seed_location_services_from_csv()
+def seed_location_services():
+    if LocationService.query.count() == 0:
+        seed_location_services_from_csv()
 

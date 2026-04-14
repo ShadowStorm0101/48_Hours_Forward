@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import seed_data
+from app.models import seed_data, seed_location_services
 
 
 def main():
@@ -9,6 +9,7 @@ def main():
         db.drop_all()
         db.create_all()
         seed_data()
+        seed_location_services()   # function to add service locations, from models.py
         print("Database reset and seeded.")
 
 
