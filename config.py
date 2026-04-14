@@ -9,7 +9,7 @@ class Config:
 
     # Database (store in instance/app.db by default)
     DB_PATH = os.environ.get("DB_PATH", os.path.join(basedir, "instance", "app.db"))
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")   # why sqlite here?
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Session cookie security
