@@ -7,10 +7,15 @@ from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from . import db
+<<<<<<< HEAD
 from .models import User, Post, LocationService
+=======
+from .models import User
+>>>>>>> feature/dashboard-access-control
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
+
 
 main = Blueprint("main", __name__)
 
@@ -31,6 +36,21 @@ def _current_user() -> User | None:
         return None
     return User.query.get(uid)
 
+# calculate days/months etc of delta
+def get_delta(delta):
+    days = delta.days
+    hours = delta.seconds // 3600
+    minutes = (delta.seconds % 3600) // 60
+
+    years = days // 365
+    months = (days % 365) // 30
+    remaining_days = (days % 365) % 30
+
+    current_narcotics_streak = f"{years} years  {months} months  {remaining_days} days  {hours} hours  {minutes} minutes"
+
+    return current_narcotics_streak
+
+
 @main.route("/")
 def home():
     # If already logged in, skip landing page
@@ -45,7 +65,6 @@ def register():
         raw_public_username = request.form.get("public_username", "")
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
-        raw_bio = request.form.get("bio", "")
 
         ip = request.remote_addr or "unknown"
         ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -54,7 +73,6 @@ def register():
             public_username = validate_username(raw_public_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
-            bio = validate_bio(raw_bio)
         except ValueError as e:
             flash(str(e), "error")
             security_logger.warning("REGISTER FAILED at %s ip=%s email=%r reason=%s", ts, ip, raw_email, str(e))
@@ -69,13 +87,11 @@ def register():
             flash("That username is taken. Choose another.", "error")
             return render_template("register.html")
 
-        safe_bio = sanitize_html(bio) if bio else ""
-        encrypted_bio = encrypt_bio(safe_bio, current_app.config["BIO_ENCRYPTION_KEY"]) if safe_bio else None
 
         pepper = current_app.config["PASSWORD_PEPPER"]
-        pw_hash = hash_password(password, pepper)
+        password_hash = hash_password(password, pepper)
 
-        user = User(username=public_username, email=email, password=pw_hash, role="user", bio=encrypted_bio)
+        user = User(username=public_username, email=email, password_hash=password_hash, role="user", alcohol_streak_start=None, narcotics_streak_start=None, nicotine_streak_start=None)
         db.session.add(user)
         db.session.commit()
 
@@ -100,7 +116,7 @@ def login():
 
         user = User.query.filter_by(email=raw_email.strip()).first()
 
-        if user and verify_password(raw_password.strip(), user.password, current_app.config["PASSWORD_PEPPER"]):
+        if user and verify_password(raw_password.strip(), user.password_hash, current_app.config["PASSWORD_PEPPER"]):
             session["user_id"] = user.id
             session["role"] = user.role
             flash(f"Logged in as {user.username}", "success")
@@ -125,16 +141,40 @@ def dashboard():
         flash("Please log in first.", "error")
         return redirect(url_for("main.login"))
 
-    # Optional: load posts (safe default)
-    posts = (
-        Post.query.options(joinedload(Post.author))
-        .order_by(Post.created_at.desc())
-        .limit(25)
-        .all()
-    )
 
-    # Your dashboard.html currently only uses role, but keeping posts ready is useful later.
-    return render_template("dashboard.html", role=user.role, posts=posts, user=user)
+
+    # Calculating streak, now minus streak start
+    if user.alcohol_streak_start is not None:
+        delta = datetime.utcnow() - user.alcohol_streak_start
+        current_alcohol_streak = get_delta(delta)
+    else:
+        current_alcohol_streak = None
+
+    if user.nicotine_streak_start is not None:
+        delta = datetime.utcnow() - user.nicotine_streak_start
+        current_nicotine_streak = get_delta(delta)
+    else:
+        current_nicotine_streak = None
+
+    if user.narcotics_streak_start is not None:
+        delta = datetime.utcnow() - user.narcotics_streak_start
+        current_narcotics_streak = get_delta(delta)
+    else:
+        current_narcotics_streak = None
+
+    edit = request.args.get("edit")
+
+
+    # Your dashboard.html currently only uses role, but keeping posts ready is useful later. *What does this mean-zak*
+    # passing streaks - zak
+    return render_template(
+        "dashboard.html",
+        user=user,
+        current_alcohol_streak=current_alcohol_streak,
+        current_nicotine_streak=current_nicotine_streak,
+        current_narcotics_streak=current_narcotics_streak,
+        edit=edit
+    )
 
 @main.route("/logout")
 @login_required
@@ -220,24 +260,46 @@ def update_habits():
         return redirect(url_for("main.login"))
 
     selected = request.form.getlist("habits")
+    print("selected habits:", selected)
 
-    # Reset all
-    user.alcohol = False
-    user.smoking = False
-    user.narcotics = False
-
-    # Apply choices
+    # Apply choices, Also need to call function to start addiction time
     if "alcohol" in selected:
-        user.alcohol = True
-    if "smoking" in selected:
-        user.smoking = True
+        if user.alcohol_streak_start is None:
+            user.alcohol_streak_start = datetime.utcnow()
+    else:
+        user.alcohol_streak_start = None
+
+    if "nicotine" in selected:
+        if user.nicotine_streak_start is None:
+            user.nicotine_streak_start = datetime.utcnow()
+    else:
+        user.nicotine_streak_start = None
+
     if "narcotics" in selected:
-        user.narcotics = True
+        if user.narcotics_streak_start is None:
+            user.narcotics_streak_start = datetime.utcnow()
+    else:
+        user.narcotics_streak_start = None
 
     db.session.commit()
 
     flash("Preferences updated!", "success")
-    return redirect(url_for("main.profile"))
+
+
+    return redirect(url_for("main.dashboard"))
+
+@main.route("/reset")
+@login_required
+def reset():
+    user = _current_user()
+
+    #### If in the dashboard the addiction selected = *addiction type then*
+    # user.alcohol_streak_start_streak_start = datetime.utcnow()
+    # user.nicotine_streak_start = datetime.utcnow()
+    # user.narcotics_streak_start = datetime.utcnow()             # calls function to set datetime to now
+
+    db.session.commit()             # commit to db
+    return redirect(url_for("main.dashboard"))
 
 @main.route("/help")
 @login_required
