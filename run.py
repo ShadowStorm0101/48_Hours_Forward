@@ -8,4 +8,4 @@ with app.app_context():
     # removed seed data function from here
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)   # including all network interfaces, container 'listens' on 5000
