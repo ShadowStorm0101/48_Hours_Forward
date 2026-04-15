@@ -14,13 +14,18 @@
 <br>
 
 # For Docker
+Install docker at 
+https://www.docker.com/products/docker-desktop/
+
+Run this:
+```
+git pull
+docker compose up --build
+```
 Use this as url, terminal link not correct (I'll fix this)
 #### http://127.0.0.1:5001
 
 Seeded users aren't on the database (I'll fix this)
-Create a test account and use that instead.
-
-Run this:
-```docker compose up --build```
+Create a test account through register and use that instead.
 
 Any questions just text me
