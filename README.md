@@ -13,8 +13,14 @@
 
 <br>
 
+# For Docker
 Use this as url, terminal link not correct (I'll fix this)
-### http://127.0.0.1:5001
+#### http://127.0.0.1:5001
 
 Seeded users aren't on the database (I'll fix this)
 Create a test account and use that instead.
+
+Run this:
+```docker compose up --build```
+
+Any questions just text me
