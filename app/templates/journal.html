@@ -76,39 +76,50 @@
 
     <main class="journal-main">
       {% if active_entry %}
-        <form method="POST"
-              action="{{ url_for('main.save_journal_entry', entry_id=active_entry.id) }}"
-              style="display:flex; flex-direction:column; height:100%;">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <form method="POST"
+        action="{{ url_for('main.save_journal_entry', entry_id=active_entry.id) }}"
+        style="display:flex; flex-direction:column; height:100%;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-          <header class="entry-header">
-            <div class="entry-date">
-              {{ active_entry.updated_at.strftime('%d/%m/%y') }}
+    <header class="entry-header">
+      <div class="entry-date">
+        {{ active_entry.updated_at.strftime('%d/%m/%y') }}
+              </div>
+              <div class="entry-title-container">
+                <input
+                  type="text"
+                  class="entry-title-input"
+                  name="title"
+                  value="{{ active_entry.title }}"
+                  maxlength="120"
+                  required
+                >
+              </div>
+            </header>
+
+            <div style="padding: 12px 30px 0 30px; display:flex; gap:12px; align-items:center;">
+              <button type="submit" class="create-new-btn" style="width:auto;">Save Entry</button>
             </div>
-            <div class="entry-title-container">
-              <input
-                type="text"
-                class="entry-title-input"
-                name="title"
-                value="{{ active_entry.title }}"
-                maxlength="120"
-                required
-              >
+
+            <div style="padding: 20px 30px 12px 30px; flex:1; display:flex; flex-direction:column;">
+              <textarea
+                name="content"
+                style="width:100%; min-height:350px; resize:vertical; font:inherit; padding:12px;"
+              >{{ active_entry.content }}</textarea>
             </div>
-          </header>
+          </form>
 
-          <div style="padding: 12px 30px 0 30px;">
-            <button type="submit" class="create-new-btn" style="width:auto;">Save Entry</button>
+          <div style="padding: 0 30px 30px 30px;">
+            <form method="POST"
+                  action="{{ url_for('main.delete_journal_entry', entry_id=active_entry.id) }}"
+                  onsubmit="return confirm('Delete this journal entry?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="create-new-btn" style="width:auto; background:#dc3545;">
+                Delete Entry
+              </button>
+            </form>
           </div>
-
-          <div style="padding: 20px 30px 30px 30px; flex:1; display:flex; flex-direction:column;">
-            <textarea
-              name="content"
-              style="width:100%; min-height:350px; resize:vertical; font:inherit; padding:12px;"
-            >{{ active_entry.content }}</textarea>
-          </div>
-        </form>
-      {% else %}
+        {% else %}
         <header class="entry-header">
           <div class="entry-date">--/--/--</div>
           <div class="entry-title-container">

@@ -230,6 +230,24 @@ def toggle_journal_favourite(entry_id):
 
     return redirect(url_for("main.journal", entry_id=entry.id))
 
+@main.route("/journal/<int:entry_id>/delete", methods=["POST"])
+@login_required
+def delete_journal_entry(entry_id):
+    user = _current_user()
+    if not user:
+        flash("Please log in first.", "error")
+        return redirect(url_for("main.login"))
+
+    entry = JournalEntry.query.filter_by(id=entry_id, user_id=user.id).first_or_404()
+
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash("Journal entry deleted.", "success")
+    return redirect(url_for("main.journal"))
+
+
+
 
 
 
