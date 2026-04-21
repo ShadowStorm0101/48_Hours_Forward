@@ -16,14 +16,27 @@
     }
   </script>
 
-  <nav class="navbar">
+<nav class="navbar">
+  {% if session.get("user_id") %}
     <div class="nav-item"><a href="/journal">Journal</a></div>
     <div class="nav-item"><a href="/dashboard">Dashboard</a></div>
     <div class="nav-item"><a href="/resources">Resources</a></div>
     <div class="nav-item"><a href="/map">Map</a></div>
     <div class="nav-item"><a href="/profile">Profile</a></div>
     <div class="nav-item"><a href="/help">Help</a></div>
-  </nav>
+
+    <div class="nav-item">
+      <form method="POST" action="{{ url_for('main.logout') }}" class="nav-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="nav-button">Logout</button>
+      </form>
+    </div>
+    
+  {% else %}
+    <div class="nav-item"><a href="{{ url_for('main.login') }}">Login</a></div>
+    <div class="nav-item"><a href="{{ url_for('main.register') }}">Register</a></div>
+  {% endif %}
+</nav>
 
   <div class="container">
     {% with messages = get_flashed_messages(with_categories=false) %}

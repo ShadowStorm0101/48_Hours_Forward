@@ -98,7 +98,7 @@ def login():
             flash("Please enter both email and password.", "error")
             return render_template("login.html")
 
-        user = User.query.filter_by(email=raw_email.strip()).first()
+        user = User.query.filter_by(email=raw_email.strip().lower()).first()
 
         if user and verify_password(raw_password.strip(), user.password, current_app.config["PASSWORD_PEPPER"]):
             session["user_id"] = user.id
@@ -136,12 +136,13 @@ def dashboard():
     # Your dashboard.html currently only uses role, but keeping posts ready is useful later.
     return render_template("dashboard.html", role=user.role, posts=posts, user=user)
 
-@main.route("/logout")
+@main.route("/logout", methods=["POST"])
 @login_required
 def logout():
     session.clear()
     flash("Logged out.", "success")
     return redirect(url_for("main.login"))
+
 
 @main.route("/journal")
 @login_required

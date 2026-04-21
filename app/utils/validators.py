@@ -5,17 +5,13 @@ EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ALLOWED_ROLES = {"user", "moderator", "admin"}
 
 BANNED_PASSWORDS = {
-    "password123$",
-    "qwerty123!",
-    "adminadmin1@",
-    "welcome123!"
 }
 
 
 def validate_email(value: str, max_length: int = 80) -> str:
     if not isinstance(value, str):
         raise ValueError("Email must be a string.")
-    value = value.strip()
+    value = value.strip().lower()
     if not value:
         raise ValueError("Email is required.")
     if len(value) > max_length:

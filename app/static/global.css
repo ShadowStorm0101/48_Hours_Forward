@@ -90,3 +90,27 @@ body.high-contrast .nav-item.active {
   color: #000 !important;
   border-color: #0ff;
 }
+
+.nav-form {
+  margin: 0;
+  width: 100%;
+}
+
+.nav-button {
+  display: block;
+  width: 100%;
+  padding: 10px 24px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.nav-button:hover {
+  background: #f9fafb;
+  color: #1a1a1a;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16), 0 2px 5px rgba(0, 0, 0, 0.1);
+}
