@@ -25,6 +25,8 @@ class User(db.Model):
         default="user",
     )
 
+    journal_entries: Mapped[List["JournalEntry"]] = relationship("JournalEntry", back_populates="user", cascade="all, delete-orphan")
+
     # encrypted bio (nullable)
     bio: Mapped[Optional[str]] = mapped_column(String(1200), nullable=True)
 
@@ -150,3 +152,18 @@ def seed_location_services_from_csv():
 
             db.session.add(service)
         db.session.commit()
+
+
+class JournalEntry(db.Model):
+
+    __tablename__ = "journal_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(120), nullable=False, default="New Entry")
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    is_favourite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="journal_entries")
