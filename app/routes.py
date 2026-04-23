@@ -116,11 +116,49 @@ def verify():
         db.session.commit()
 
         session.pop("verify_email", None)
+        session["onboarding_user"] = user.id
 
-        flash("Verified! You can log in.", "success")
-        return redirect(url_for("main.login"))
+        flash("Email verified", "success")
+        return redirect(url_for("main.onboarding"))
 
     return render_template("verify.html")
+
+
+@main.route("/onboarding", methods=["GET", "POST"])
+def onboarding():
+    user_id= session.get("onboarding_user")
+
+    if not user_id:
+        flash("Session expired. please register again.", "error")
+        return redirect(url_for("main.register"))
+
+    user = db.session.get(User,user_id)
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.register"))
+
+    if request.method == "POST":
+        gender = request.form.get("gender")
+        age = request.form.get("age")
+        addictions = request.form.getlist("addictions")
+
+        user.gender = gender
+        user.age = int(age) if age else None
+
+        user.alcohol = "alcohol" in addictions
+        user.smoking = "smoking" in addictions
+        user.narcotics = "narcotics" in addictions
+
+        db.session.commit()
+
+        session.pop("onboarding_user", None)
+
+        flash("Profile setup complete!", "success")
+        return redirect(url_for("main.login"))
+
+    return render_template("onboarding.html")
+
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
