@@ -112,6 +112,7 @@ def seed_data():
 
     db.session.add_all([admin, moderator, user1, user2])
     db.session.commit()
+    seed_resources()
 
 
 def seed_location_services_from_csv():
@@ -146,7 +147,37 @@ def seed_location_services_from_csv():
             db.session.add(service)
         db.session.commit()
 
+def seed_resources_from_csv():
+    csv_path = os.path.join(
+        current_app.root_path,
+        "static",
+        "database_data",
+        "resources.csv"
+    )
+
+    with open(csv_path) as csv_file:
+        reader = csv.DictReader(csv_file)
+
+        for row in reader:
+            if not row.get("Name"):
+                continue
+
+            resource = Resource(
+                name=row["Name"].strip(),
+                url=row["URL"].strip(),
+                is_alcohol=row.get("IsAlcohol", "0").strip() == "1",
+                is_nicotine=row.get("IsNicotine", "0").strip() == "1",
+                is_narcotics=row.get("IsNarcotics", "0").strip() == "1"
+            )
+
+            db.session.add(resource)
+
+        db.session.commit()
+
 def seed_location_services():
     if LocationService.query.count() == 0:
         seed_location_services_from_csv()
 
+def seed_resources():
+    if Resource.query.count() == 0:
+        seed_resources_from_csv()
