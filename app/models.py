@@ -50,6 +50,19 @@ class LocationService(db.Model):
     is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
     is_nicotine: Mapped[bool] = mapped_column(Boolean, default=False)
 
+class Resource(db.Model):
+    __tablename__ = "resources"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    url: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    is_alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_nicotine: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    def __repr__(self):
+        return f"Resource(id={self.id}, name={self.name})"
 
 def seed_data():
     """Populate sample users and posts (called from reset_db.py / run.py)."""
