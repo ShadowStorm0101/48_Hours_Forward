@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from . import db
-from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean
+from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -25,6 +25,10 @@ class User(db.Model):
     alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
     smoking: Mapped[bool] = mapped_column(Boolean, default=False)
     narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    gender: Mapped[Optional[bool]] = mapped_column(String(20), default=False)
+    age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
     verification_code: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
     verification_expiry: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
