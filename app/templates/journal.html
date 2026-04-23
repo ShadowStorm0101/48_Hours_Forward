@@ -1,7 +1,126 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}Journal{% endblock %}
 
+{% block head %}
+  <link rel="stylesheet" href="../static/journal.css">
+{% endblock %}
+
 {% block content %}
-<h1>Journal Page</h1>
+  <div class="journal-wrapper">
+    
+    <aside class="journal-sidebar">
+      <div class="sidebar-header">
+        <button class="create-new-btn">Create New</button>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="section-heading">Favourites</h3>
+        <ul class="journal-list">
+          <li class="journal-item" data-date="14/2/26">
+            <span class="item-title">Day 1 - Title</span>
+            <span class="star-icon">⭐</span>
+          </li>
+          <li class="journal-item" data-date="04/4/26">
+            <span class="item-title">Day 50 - Title</span>
+            <span class="star-icon">⭐</span>
+          </li>
+          <li class="journal-item" data-date="13/5/26">
+            <span class="item-title">Day 89 - Title</span>
+            <span class="star-icon">⭐</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="section-heading">Recent</h3>
+        <ul class="journal-list" id="recent-list">
+          <li class="journal-item active" data-date="20/5/26">
+            <span class="item-title">Day 96 - Title</span>
+            <span class="star-icon">☆</span>
+          </li>
+          <li class="journal-item" data-date="19/5/26">
+            <span class="item-title">Day 95 - Title</span>
+            <span class="star-icon">☆</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="journal-main">
+      <header class="entry-header">
+        <div class="entry-date" id="display-date">20/5/26</div>
+        <div class="entry-title-container">
+          <input type="text" class="entry-title-input" id="display-title" value="Day 96 - Title">
+        </div>
+      </header>
+
+      <article class="entry-content" id="display-content" contenteditable="true">
+        <p>Start writing your journal entry here...</p>
+      </article>
+    </main>
+
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    const displayTitle = document.getElementById('display-title');
+    const displayDate = document.getElementById('display-date');
+    const displayContent = document.getElementById('display-content');
+    const createBtn = document.querySelector('.create-new-btn');
+    const recentList = document.getElementById('recent-list');
+
+    function setupItem(item) {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.journal-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+        
+        displayTitle.value = this.querySelector('.item-title').textContent;
+        displayDate.textContent = this.getAttribute('data-date');
+        
+        displayContent.innerHTML = this.dataset.content || `<p>Start writing your journal entry here...</p>`;
+      });
+
+      const star = item.querySelector('.star-icon');
+      star.addEventListener('click', function(e) {
+        e.stopPropagation();
+        this.textContent = this.textContent === '⭐' ? '☆' : '⭐';
+      });
+    }
+
+    document.querySelectorAll('.journal-item').forEach(setupItem);
+
+    displayTitle.addEventListener('input', (e) => {
+      const activeItem = document.querySelector('.journal-item.active .item-title');
+      if (activeItem) activeItem.textContent = e.target.value;
+    });
+
+    displayContent.addEventListener('input', () => {
+      const activeItem = document.querySelector('.journal-item.active');
+      if (activeItem) activeItem.dataset.content = displayContent.innerHTML;
+    });
+
+    createBtn.addEventListener('click', () => {
+      document.querySelectorAll('.journal-item').forEach(i => i.classList.remove('active'));
+      
+      const li = document.createElement('li');
+      li.className = 'journal-item active';
+      const today = new Date().toLocaleDateString('en-GB');
+      li.setAttribute('data-date', today);
+      li.dataset.content = '<p></p>';
+      li.innerHTML = `
+        <span class="item-title">New Entry</span>
+        <span class="star-icon">☆</span>
+      `;
+      
+      recentList.prepend(li);
+      setupItem(li);
+      
+      displayDate.textContent = today;
+      displayTitle.value = 'New Entry';
+      displayContent.innerHTML = '<p></p>';
+      displayContent.focus();
+    });
+  </script>
 {% endblock %}
