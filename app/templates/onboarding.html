@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Onboarding{% endblock %}
+
+{% block content %}
+<h2>Complete Your Profile</h2>
+
+<form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <label>Gender:</label><br>
+  <select name="gender" required>
+    <option value="">Select</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="other">Other</option>
+  </select><br><br>
+
+  <label>Age:</label><br>
+  <input type="number" name="age" required><br><br>
+
+<label>Select addictions:</label><br>
+
+<input type="checkbox" name="addictions" value="alcohol"> Alcohol<br>
+<input type="checkbox" name="addictions" value="smoking"> Smoking<br>
+<input type="checkbox" name="addictions" value="narcotics"> Narcotics<br><br>
+
+<script>
+function confirmSelection() {
+    const selected = Array.from(document.querySelectorAll('input[name="addictions"]:checked'))
+        .map(el => el.value);
+
+    if (selected.length === 0) {
+        alert("Please select at least one addiction.");
+        return;
+    }
+
+    const confirmMsg = "Are you sure these are correct?\n\n" + selected.join(", ");
+    if (confirm(confirmMsg)) {
+        document.querySelector("form").submit();
+    }
+}
+</script>
+
+  <button>Finish</button>
+</form>
+
+{% endblock %}
