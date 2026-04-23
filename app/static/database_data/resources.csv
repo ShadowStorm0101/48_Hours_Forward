@@ -1,21 +1,25 @@
 Name,URL,IsAlcohol,IsNicotine,IsNarcotics
-Drinkaware,https://www.drinkaware.co.uk/,1,0,0
-Alcoholics Anonymous UK,https://www.alcoholics-anonymous.org.uk/,1,0,0
+Drinkaware,https://www.drinkaware.co.uk,1,0,0
+Alcoholics Anonymous UK,https://www.alcoholics-anonymous.org.uk,1,0,0
 NHS Alcohol Support,https://www.nhs.uk/live-well/alcohol-advice/alcohol-support/,1,0,0
 We Are With You,https://www.wearewithyou.org.uk,1,0,1
 Turning Point,https://www.turning-point.co.uk,1,0,1
 SMART Recovery UK,https://smartrecovery.org.uk,1,0,1
+Alcohol Change UK,https://alcoholchange.org.uk,1,0,0
+NHS Alcohol Advice,https://www.nhs.uk/live-well/alcohol-advice/,1,0,0
 
 NHS Better Health Quit Smoking,https://www.nhs.uk/better-health/quit-smoking/,0,1,0
 NHS Stop Smoking Services,https://www.nhs.uk/live-well/quit-smoking/nhs-stop-smoking-services-help-you-quit/,0,1,0
-Quit.org.uk,https://www.quit.org.au/en,0,1,0
 ASH,https://ash.org.uk,0,1,0
 Smokefree,https://smokefree.gov,0,1,0
-Quit Genius,https://www.quitgenius.com,0,1,0
+Asthma + Lung UK,https://www.asthmaandlung.org.uk,0,1,0
+Cancer Research UK Stop Smoking,https://www.cancerresearchuk.org/about-cancer/causes-of-cancer/smoking-and-cancer/how-do-i-stop-smoking,0,1,0
+British Heart Foundation Smoking,https://www.bhf.org.uk/informationsupport/risk-factors/smoking,0,1,0
+BHF Stop Smoking,https://www.bhf.org.uk/informationsupport/heart-matters-magazine/wellbeing/stop-smoking,0,1,0
 
 Talk to Frank,https://www.talktofrank.com,0,0,1
-Narcotics Anonymous UK,https://ukna.org,0,0,1
+Narcotics Anonymous UK,https://ukna.org/content/welcome-ukna,0,0,1
+UKNA Helpline,https://helpline.ukna.org/content/welcome-ukna-helpline,0,0,1
 NHS Drug Addiction Support,https://www.nhs.uk/live-well/addiction-support/drug-addiction-getting-help/,0,0,1
 Release,https://www.release.org.uk,0,0,1
-Phoenix Futures,https://www.phoenix-futures.org.uk,0,0,1
 Change Grow Live,https://www.changegrowlive.org,0,0,1

@@ -8,7 +8,7 @@ from sqlalchemy.orm import joinedload
 
 from . import db
 
-from .models import User, LocationService
+from .models import User, LocationService, Resource
 
 from .models import User
 
@@ -191,7 +191,25 @@ def journal():
 @main.route("/resources")
 @login_required
 def resources():
-    return render_template("resources.html")
+
+    alcohol_resources = Resource.query.filter_by(
+        is_alcohol=True
+    ).all()
+
+    nicotine_resources = Resource.query.filter_by(
+        is_nicotine=True
+    ).all()
+
+    narcotics_resources = Resource.query.filter_by(
+        is_narcotics=True
+    ).all()
+
+    return render_template(
+        "resources.html",
+        alcohol_resources=alcohol_resources,
+        nicotine_resources=nicotine_resources,
+        narcotics_resources=narcotics_resources
+    )
 
 @main.route("/map")
 @login_required

@@ -20,15 +20,11 @@
       <button class="scroll-btn">&lt;</button>
 
       <div class="resource-row">
-        <a href="#" class="resource-card">AA Meeting Local</a>
-        <a href="#" class="resource-card">Hotline</a>
-        <a href="#" class="resource-card">Emergency Hotline</a>
-        <a href="#" class="resource-card">Example 1</a>
-        <a href="#" class="resource-card">Example 2</a>
-        <a href="#" class="resource-card">Example 3</a>
-        <a href="#" class="resource-card">Example 4</a>
-        <a href="#" class="resource-card">Example 5</a>
-        <a href="#" class="resource-card">Example 6</a>
+        {% for resource in alcohol_resources %}
+          <a href="{{ resource.url }}" class="resource-card" target="_blank" rel="noopener noreferrer">
+            {{ resource.name }}
+          </a>
+        {% endfor %}
       </div>
 
       <button class="scroll-btn">&gt;</button>
@@ -44,15 +40,11 @@
       <button class="scroll-btn">&lt;</button>
 
       <div class="resource-row">
-        <a href="#" class="resource-card">Example 1</a>
-        <a href="#" class="resource-card">Example 2</a>
-        <a href="#" class="resource-card">Example 3</a>
-        <a href="#" class="resource-card">Example 4</a>
-        <a href="#" class="resource-card">Example 5</a>
-        <a href="#" class="resource-card">Example 6</a>
-        <a href="#" class="resource-card">Example 7</a>
-        <a href="#" class="resource-card">Example 8</a>
-        <a href="#" class="resource-card">Example 9</a>
+        {% for resource in nicotine_resources %}
+          <a href="{{ resource.url }}" class="resource-card" target="_blank" rel="noopener noreferrer">
+            {{ resource.name }}
+          </a>
+        {% endfor %}
       </div>
 
       <button class="scroll-btn">&gt;</button>
@@ -68,15 +60,11 @@
       <button class="scroll-btn">&lt;</button>
 
       <div class="resource-row">
-        <a href="#" class="resource-card">Example 1</a>
-        <a href="#" class="resource-card">Example 2</a>
-        <a href="#" class="resource-card">Example 3</a>
-        <a href="#" class="resource-card">Example 4</a>
-        <a href="#" class="resource-card">Example 5</a>
-        <a href="#" class="resource-card">Example 6</a>
-        <a href="#" class="resource-card">Example 7</a>
-        <a href="#" class="resource-card">Example 8</a>
-        <a href="#" class="resource-card">Example 9</a>
+        {% for resource in narcotics_resources %}
+          <a href="{{ resource.url }}" class="resource-card" target="_blank" rel="noopener noreferrer">
+            {{ resource.name }}
+          </a>
+        {% endfor %}
       </div>
 
       <button class="scroll-btn">&gt;</button>
