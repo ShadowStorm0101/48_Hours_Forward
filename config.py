@@ -24,6 +24,16 @@ class Config:
     # Crypto secrets
     PASSWORD_PEPPER = os.environ.get("PASSWORD_PEPPER", "dev-pepper-change-me")
 
+    # Email config
+    RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+    EMAIL_FROM = os.environ.get(
+        "EMAIL_FROM",
+        "48 Hours Forward <onboarding@resend.dev>"
+    )
+
+    # can create own Resend account
+    # and add own API key for live email testing.
+
     # Fernet key (must be base64 urlsafe 32-byte key)
     BIO_ENCRYPTION_KEY = os.environ.get(
         "BIO_ENCRYPTION_KEY",
