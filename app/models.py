@@ -32,7 +32,9 @@ class User(db.Model):
     narcotics_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     nicotine_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     # addiction_type: Mapped[str] = mapped_column(String(16), nullable=False) # We seem to use booleans, can revisit -zak
-
+    last_login_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    last_reminder_sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    reminder_email_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
