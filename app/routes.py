@@ -117,6 +117,9 @@ def login():
         user = User.query.filter_by(email=raw_email.strip()).first()
 
         if user and verify_password(raw_password.strip(), user.password_hash, current_app.config["PASSWORD_PEPPER"]):
+            user.last_login_at = datetime.utcnow()
+            db.session.commit()
+
             session["user_id"] = user.id
             session["role"] = user.role
             flash(f"Logged in as {user.username}", "success")
