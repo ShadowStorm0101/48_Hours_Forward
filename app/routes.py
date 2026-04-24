@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
@@ -9,6 +9,7 @@ from sqlalchemy.orm import joinedload
 from . import db
 
 from .models import User, LocationService, Resource
+from .utils.email_notifications import send_checkin_reminder_email
 
 from .models import User
 
@@ -321,6 +322,33 @@ def reset():
 
     db.session.commit()             # commit to db
     return redirect(url_for("main.dashboard"))
+
+@main.route("/send-reminders")
+def send_reminders():
+    now = datetime.utcnow()
+
+    inactive_users = User.query.filter(
+        User.last_login_at != None,
+        User.last_login_at <= now - timedelta(days=1),
+        User.reminder_email_enabled == True
+    ).all()
+
+    emails_sent = 0
+
+    for user in inactive_users:
+        if (
+            user.last_reminder_sent_at is None
+            or user.last_reminder_sent_at <= now - timedelta(days=1)
+        ):
+            email_sent = send_checkin_reminder_email(user)
+
+            if email_sent:
+                user.last_reminder_sent_at = now
+                emails_sent += 1
+
+    db.session.commit()
+
+    return f"{emails_sent} reminder emails sent."
 
 @main.route("/help")
 @login_required
