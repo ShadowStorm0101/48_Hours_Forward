@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2a5e126e-5bae-471c-9ae2-d3213c558160" name="Changes" comment="Dashboard functionality with postgresql contents merged from main">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-    </list>
+    <list default="true" id="2a5e126e-5bae-471c-9ae2-d3213c558160" name="Changes" comment="Added readme for docker troubleshoot" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -110,7 +107,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776207540844</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Added readme for docker troubleshoot">
+      <option name="closed" value="true" />
+      <created>1776938219867</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1776938219867</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -131,7 +136,8 @@
     <MESSAGE value="Added requirement for postgresql in requirements.txt" />
     <MESSAGE value="Dashboard html now includes flask logic, Added function to edit current addictions&#10;Switched from sqlite to postgresql" />
     <MESSAGE value="Dashboard functionality with postgresql contents merged from main" />
-    <option name="LAST_COMMIT_MESSAGE" value="Dashboard functionality with postgresql contents merged from main" />
+    <MESSAGE value="Added readme for docker troubleshoot" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added readme for docker troubleshoot" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
