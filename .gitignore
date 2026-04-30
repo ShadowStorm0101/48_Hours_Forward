@@ -5,3 +5,8 @@ __pycache__/
 .env
 venv/
 .venv/
+<<<<<<< HEAD
+=======
+__pycache__/
+*.xml
+>>>>>>> fb70384 (added git ignore for .xml)
