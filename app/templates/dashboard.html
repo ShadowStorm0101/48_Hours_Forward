@@ -2,19 +2,82 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h2>Dashboard</h2>
+<h2>Welcome, {{ user.username }}</h2>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul>
-      {% for category, message in messages %}
-        <li style="color: {{ 'red' if category == 'error' else 'green' }};">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+{% if role == "moderator" and stats %}
+<h3>Moderator Analytics</h3>
 
-<p>Your role: <strong>{{ role }}</strong></p>
+<canvas id="genderChart"></canvas>
+<br>
+<canvas id="addictionChart"></canvas>
+<br>
+<canvas id="ageChart"></canvas>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const stats = {{ stats | tojson }};
+
+new Chart(document.getElementById("genderChart"), {
+    type: "pie",
+    data: {
+        labels: ["Male", "Female", "Other"],
+        datasets: [{
+            data: [
+                stats.gender.male,
+                stats.gender.female,
+                stats.gender.other
+            ]
+        }]
+    }
+});
+
+new Chart(document.getElementById("addictionChart"), {
+    type: "bar",
+    data: {
+        labels: ["Alcohol", "Smoking", "Narcotics"],
+        datasets: [{
+            data: [
+                stats.addictions.alcohol,
+                stats.addictions.smoking,
+                stats.addictions.narcotics
+            ]
+        }]
+    }
+});
+
+new Chart(document.getElementById("ageChart"), {
+    type: "bar",
+    data: {
+        labels: ["Under 18", "18-25", "26-40", "40+"],
+        datasets: [{
+            data: [
+                stats.age_groups.under_18,
+                stats.age_groups["18_25"],
+                stats.age_groups["26_40"],
+                stats.age_groups["40_plus"]
+            ]
+        }]
+    }
+});
+</script>
+
+{% else %}
+<h3>Recent Posts</h3>
+
+{% if posts %}
+  {% for post in posts %}
+    <div>
+      <h4>{{ post.title }}</h4>
+      <p>{{ post.content }}</p>
+      <small>By {{ post.author.username }}</small>
+    </div>
+    <hr>
+  {% endfor %}
+{% else %}
+  <p>No posts yet.</p>
+{% endif %}
+
+{% endif %}
 
 {% endblock %}
