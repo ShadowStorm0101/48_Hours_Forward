@@ -5,6 +5,8 @@ from . import db
 from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+from flask import current_app
+from .utils.encryption import hash_password
 
 
 class User(db.Model):
@@ -57,9 +59,6 @@ class Post(db.Model):
 
 
 def seed_data():
-    from flask import current_app
-    from .utils.encryption import hash_password
-
     pepper = current_app.config["PASSWORD_PEPPER"]
 
     if User.query.count() == 0:
@@ -68,7 +67,9 @@ def seed_data():
             email="admin@example.com",
             password=hash_password("Admin123!AAA", pepper),
             role="admin",
-            is_verified=True
+            is_verified=True,
+            gender="male",
+            age=30
         )
 
         moderator = User(
@@ -76,7 +77,9 @@ def seed_data():
             email="moderator@example.com",
             password=hash_password("Moderator123!AAA", pepper),
             role="moderator",
-            is_verified=True
+            is_verified=True,
+            gender="female",
+            age=22
         )
 
         user1 = User(
@@ -84,7 +87,9 @@ def seed_data():
             email="user1@example.com",
             password=hash_password("User123!AAAA1", pepper),
             role="user",
-            is_verified=True
+            is_verified=True,
+            gender="other",
+            age=17
         )
 
         db.session.add_all([admin, moderator, user1])
