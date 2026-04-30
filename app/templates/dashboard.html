@@ -9,53 +9,56 @@
 
 <canvas id="genderChart"></canvas>
 <br>
-<canvas id="addictionChart"></canvas>
-<br>
 <canvas id="ageChart"></canvas>
+<br>
+<canvas id="addictionChart"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 const stats = {{ stats | tojson }};
 
+// Gender Pie
 new Chart(document.getElementById("genderChart"), {
     type: "pie",
     data: {
         labels: ["Male", "Female", "Other"],
         datasets: [{
             data: [
-                stats.gender.male,
-                stats.gender.female,
-                stats.gender.other
+                stats.gender.male || 0,
+                stats.gender.female || 0,
+                stats.gender.other || 0
             ]
         }]
     }
 });
 
+// Age Pie
+new Chart(document.getElementById("ageChart"), {
+    type: "pie",
+    data: {
+        labels: ["Under 18", "18-25", "26-40", "40+"],
+        datasets: [{
+            data: [
+                stats.age_groups.under_18 || 0,
+                stats.age_groups["18_25"] || 0,
+                stats.age_groups["26_40"] || 0,
+                stats.age_groups["40_plus"] || 0
+            ]
+        }]
+    }
+});
+
+// Addictions Bar
 new Chart(document.getElementById("addictionChart"), {
     type: "bar",
     data: {
         labels: ["Alcohol", "Smoking", "Narcotics"],
         datasets: [{
             data: [
-                stats.addictions.alcohol,
-                stats.addictions.smoking,
-                stats.addictions.narcotics
-            ]
-        }]
-    }
-});
-
-new Chart(document.getElementById("ageChart"), {
-    type: "bar",
-    data: {
-        labels: ["Under 18", "18-25", "26-40", "40+"],
-        datasets: [{
-            data: [
-                stats.age_groups.under_18,
-                stats.age_groups["18_25"],
-                stats.age_groups["26_40"],
-                stats.age_groups["40_plus"]
+                stats.addictions.alcohol || 0,
+                stats.addictions.smoking || 0,
+                stats.addictions.narcotics || 0
             ]
         }]
     }
