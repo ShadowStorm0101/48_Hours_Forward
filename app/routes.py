@@ -42,12 +42,10 @@ def get_delta(delta):
     days = delta.days
     hours = delta.seconds // 3600
     minutes = (delta.seconds % 3600) // 60
-
-    years = days // 365
-    months = (days % 365) // 30
+    seconds = delta.seconds // 60
     remaining_days = (days % 365) % 30
 
-    current_narcotics_streak = f"{years} years  {months} months  {remaining_days} days  {hours} hours  {minutes} minutes"
+    current_narcotics_streak = f"{remaining_days} days  {hours} hours  {minutes} minutes {seconds} seconds"
 
     return current_narcotics_streak
 
