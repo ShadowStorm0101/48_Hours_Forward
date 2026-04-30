@@ -21,6 +21,7 @@ Run this:
 ```
 git pull
 docker compose up --build
+docker compose exec web python reset_db.py
 ```
 <br>
 
