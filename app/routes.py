@@ -5,6 +5,7 @@ from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
 from sqlalchemy.orm import joinedload
+from sqlalchemy import func
 
 from . import db
 from .models import User, Post
@@ -197,7 +198,70 @@ def dashboard():
         .all()
     )
 
-    return render_template("dashboard.html", user=user, posts=posts, role=user.role)
+    stats = None
+
+    if user.role == "moderator":
+        users = User.query.all()
+
+        total_users = len(users)
+
+        male = female = other = 0
+        alcohol = smoking = narcotics = 0
+
+        age_groups = {
+            "under_18": 0,
+            "18_25": 0,
+            "26_40": 0,
+            "40_plus": 0
+        }
+
+        for u in users:
+            if u.gender == "male":
+                male += 1
+            elif u.gender == "female":
+                female += 1
+            elif u.gender == "other":
+                other += 1
+
+            if u.alcohol:
+                alcohol += 1
+            if u.smoking:
+                smoking += 1
+            if u.narcotics:
+                narcotics += 1
+
+            if u.age is not None:
+                if u.age < 18:
+                    age_groups["under_18"] += 1
+                elif 18 <= u.age <= 25:
+                    age_groups["18_25"] += 1
+                elif 26 <= u.age <= 40:
+                    age_groups["26_40"] += 1
+                else:
+                    age_groups["40_plus"] += 1
+
+        stats = {
+            "total_users": total_users,
+            "gender": {
+                "male": male,
+                "female": female,
+                "other": other
+            },
+            "addictions": {
+                "alcohol": alcohol,
+                "smoking": smoking,
+                "narcotics": narcotics
+            },
+            "age_groups": age_groups
+        }
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        posts=posts,
+        role=user.role,
+        stats=stats
+    )
 
 @main.route("/profile")
 @login_required
