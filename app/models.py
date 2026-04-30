@@ -26,7 +26,7 @@ class User(db.Model):
     smoking: Mapped[bool] = mapped_column(Boolean, default=False)
     narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    gender: Mapped[Optional[bool]] = mapped_column(String(20), default=False)
+    gender: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     verification_code: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
@@ -71,6 +71,14 @@ def seed_data():
             is_verified=True
         )
 
+        moderator = User(
+            username="moderator",
+            email="moderator@example.com",
+            password=hash_password("Moderator123!AAA", pepper),
+            role="moderator",
+            is_verified=True
+        )
+
         user1 = User(
             username="user1",
             email="user1@example.com",
@@ -79,5 +87,5 @@ def seed_data():
             is_verified=True
         )
 
-        db.session.add_all([admin, user1])
+        db.session.add_all([admin, moderator, user1])
         db.session.commit()
