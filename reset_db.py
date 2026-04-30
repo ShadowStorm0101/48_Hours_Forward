@@ -1,23 +1,15 @@
-import os
 from app import create_app, db
-from app.models import seed_data
+from app.models import seed_data, seed_location_services
 
 
 def main():
     app = create_app()
 
-    # Delete DB file safely
-    db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
-    if db_uri.startswith("sqlite:///"):
-        db_path = db_uri.replace("sqlite:///", "", 1)
-        if os.path.exists(db_path):
-            os.remove(db_path)
-            print(f"Deleted: {db_path}")
-
     with app.app_context():
+        db.drop_all()
         db.create_all()
-        
         seed_data()
+        seed_location_services()   # function to add service locations, from models.py
         print("Database reset and seeded.")
 
 

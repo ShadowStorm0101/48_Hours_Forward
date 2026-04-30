@@ -13,7 +13,7 @@ csrf = CSRFProtect()
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(Config)
-
+    print(app.config["SQLALCHEMY_DATABASE_URI"])
     # Ensure instance folder exists
     os.makedirs(app.instance_path, exist_ok=True)
 
