@@ -7,11 +7,22 @@
 {% if role == "moderator" and stats %}
 <h3>Moderator Analytics</h3>
 
-<canvas id="genderChart"></canvas>
-<br>
-<canvas id="ageChart"></canvas>
-<br>
-<canvas id="addictionChart"></canvas>
+<div class="pie-row">
+    <div class="pie-card">
+        <canvas id="genderChart"></canvas>
+        <div class="pie-label">Gender</div>
+    </div>
+
+    <div class="pie-card">
+        <canvas id="ageChart"></canvas>
+        <div class="pie-label">Age</div>
+    </div>
+
+    <div class="pie-card">
+        <canvas id="addictionChart"></canvas>
+        <div class="pie-label">Substance</div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -30,6 +41,13 @@ new Chart(document.getElementById("genderChart"), {
                 stats.gender.other || 0
             ]
         }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        }
     }
 });
 
@@ -46,12 +64,19 @@ new Chart(document.getElementById("ageChart"), {
                 stats.age_groups["40_plus"] || 0
             ]
         }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        }
     }
 });
 
-// Addictions Bar
+// Addictions Pie (kept as pie for consistent design)
 new Chart(document.getElementById("addictionChart"), {
-    type: "bar",
+    type: "pie",
     data: {
         labels: ["Alcohol", "Smoking", "Narcotics"],
         datasets: [{
@@ -61,9 +86,51 @@ new Chart(document.getElementById("addictionChart"), {
                 stats.addictions.narcotics || 0
             ]
         }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        }
     }
 });
 </script>
+
+<style>
+.pie-row {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.pie-card {
+    width: 200px;
+    height: 240px;
+    border: 1.5px solid #5a6c84;
+    border-radius: 20px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pie-card canvas {
+    width: 160px !important;
+    height: 160px !important;
+}
+
+.pie-label {
+    width: 100%;
+    text-align: center;
+    padding: 6px;
+    border: 1px solid #5a6c84;
+    border-radius: 5px;
+    font-size: 14px;
+}
+</style>
 
 {% else %}
 <h3>Recent Posts</h3>
