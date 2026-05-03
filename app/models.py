@@ -1,10 +1,12 @@
 from __future__ import annotations
 import csv
 import os
+from typing import List
+
 from flask import current_app
 from . import db
-from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time, Text, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, time
 
 
@@ -28,9 +30,25 @@ class User(db.Model):
     last_reminder_sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     reminder_email_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    journal_entries: Mapped[List["JournalEntry"]] = relationship("JournalEntry", back_populates="user",
+                                                                 cascade="all, delete-orphan")
+
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
 
+class JournalEntry(db.Model):
+
+    __tablename__ = "journal_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(120), nullable=False, default="New Entry")
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    is_favourite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="journal_entries")
 
 class LocationService(db.Model):
     __tablename__ = "location_services"
