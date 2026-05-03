@@ -1,19 +1,11 @@
 from __future__ import annotations
-
-
 import csv
 import os
-
-from email.policy import default
-
-from typing import List, Optional
-
 from flask import current_app
-
 from . import db
-from sqlalchemy import Integer, String, Float, ForeignKey, Enum, Text, DateTime, Boolean
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime
+from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time
+from sqlalchemy.orm import Mapped, mapped_column
+from datetime import datetime, time
 
 
 class User(db.Model):
@@ -47,6 +39,9 @@ class LocationService(db.Model):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     lat: Mapped[float] = mapped_column(Float, index=True, nullable=False)
     lng: Mapped[float] = mapped_column(Float, index=True, nullable=False)
+
+    day: Mapped[int] = mapped_column(Integer, index=True, nullable=False) #0=Mon, 1=Tue etc
+    time: Mapped[time] = mapped_column(Time, index=True, nullable=False)
 
     is_alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
     is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -118,35 +113,62 @@ def seed_data():
 
 
 def seed_location_services_from_csv():
-    csv_path = os.path.join(current_app.root_path,"static","database_data","location_services.csv")
-    with open(csv_path) as csv_file:
+    csv_path = os.path.join(current_app.root_path, "static", "database_data", "meetings-2025-05-19.csv")
+
+    print(f"🔍 Looking for CSV at: {csv_path}")
+    print(f"🔍 File exists: {os.path.exists(csv_path)}")
+
+    with open(csv_path, 'r', encoding='utf-8-sig') as csv_file:
         reader = csv.DictReader(csv_file)
+
+        print(f"🔍 CSV Headers found: {reader.fieldnames}")
+
+        DAY_MAP = {
+            "Monday": 0,
+            "Tuesday": 1,
+            "Wednesday": 2,
+            "Thursday": 3,
+            "Friday": 4,
+            "Saturday": 5,
+            "Sunday": 6,
+        }
+
+        row_count = 0
+        added_count = 0
+
         for row in reader:
-            # Skip empty rows or rows without a name
+            row_count += 1
+
             if not row.get("Name"):
                 continue
 
             try:
                 lat = float(row["Latitude"])
                 lng = float(row["Longitude"])
+                day = DAY_MAP[row["Day"]]
+                parsed_time = datetime.strptime(row["Time"], "%H:%M").time()
                 is_alcohol = row.get("IsAlcohol", "0").strip() == "1"
                 is_narcotics = row.get("IsNarcotics", "0").strip() == "1"
                 is_nicotine = row.get("IsNicotine", "0").strip() == "1"
 
+                service = LocationService(
+                    name=row["Name"].strip(),
+                    lat=lat,
+                    lng=lng,
+                    day=day,
+                    time=parsed_time,
+                    is_alcohol=is_alcohol,
+                    is_narcotics=is_narcotics,
+                    is_nicotine=is_nicotine,
+                )
+
+                db.session.add(service)
+                added_count += 1
+
             except ValueError as e:
-                print(f"Skipping row due to conversion error: {row} ({e})")
+                print(f"Skipping row {row_count} due to conversion error: {row.get('Name', 'Unknown')} ({e})")
                 continue
 
-            service = LocationService(
-                name=row["Name"].strip(),
-                lat=lat,
-                lng=lng,
-                is_alcohol=is_alcohol,
-                is_narcotics=is_narcotics,
-                is_nicotine=is_nicotine,
-            )
-
-            db.session.add(service)
         db.session.commit()
 
 def seed_resources_from_csv():
@@ -156,6 +178,8 @@ def seed_resources_from_csv():
         "database_data",
         "resources.csv"
     )
+
+
 
     with open(csv_path) as csv_file:
         reader = csv.DictReader(csv_file)
@@ -177,8 +201,12 @@ def seed_resources_from_csv():
         db.session.commit()
 
 def seed_location_services():
+    print(f"🔍 seed_location_services() called")
     if LocationService.query.count() == 0:
+        print("🔍 Database has 0 location services, seeding now...")
         seed_location_services_from_csv()
+    else:
+        print(f"🔍 Database already has {LocationService.query.count()} location services, skipping seed")
 
 def seed_resources():
     if Resource.query.count() == 0:

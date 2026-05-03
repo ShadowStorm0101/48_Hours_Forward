@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import joinedload
 
 from . import db
@@ -222,6 +222,18 @@ def map():
         user_lat = 54.9783
         user_lng = -1.6178
 
+    user = _current_user()
+    conditions = []
+
+    if user.alcohol_streak_start is not None:
+        conditions.append(LocationService.is_alcohol.is_(True))
+
+    if user.nicotine_streak_start is not None:
+        conditions.append(LocationService.is_nicotine.is_(True))
+
+    if user.narcotics_streak_start is not None:
+        conditions.append(LocationService.is_narcotics.is_(True))
+
     R = 6371 #Earths circumference km
 
     #Haversine formula for distance
@@ -234,19 +246,37 @@ def map():
         func.sin(func.radians(LocationService.lat))
     )
     ).label("distance")
+    total_in_db = LocationService.query.count()
+    current_app.logger.warning(f"🗺️ MAP DEBUG: Total location services in DB: {total_in_db}")
+    query = db.session.query(LocationService, distance)
+
+    if conditions:
+        query = query.filter(or_(*conditions))
 
     services = (
-        db.session.query(LocationService, distance)
+        query
         .order_by(distance)
-        .limit(15)
+        .limit(50)
         .all()
     )
+
+    DAY_MAP = {
+        0: "Monday",
+        1: "Tuesday",
+        2: "Wednesday",
+        3: "Thursday",
+        4: "Friday",
+        5: "Saturday",
+        6: "Sunday",
+    }
 
     places = [
         {
             "name": s.LocationService.name,
             "lat": s.LocationService.lat,
             "lng": s.LocationService.lng,
+            "day": DAY_MAP[s.LocationService.day],
+            "time": s.LocationService.time.strftime("%H:%M"),
             "is_alcohol": s.LocationService.is_alcohol,
             "is_narcotics": s.LocationService.is_narcotics,
             "is_nicotine": s.LocationService.is_nicotine,
