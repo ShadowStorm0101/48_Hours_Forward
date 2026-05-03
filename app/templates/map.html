@@ -62,13 +62,13 @@ function initMap(centerLat, centerLng, zoom = 12) {
 
     places.forEach(place => {
         const marker = new google.maps.Marker({
-            position: { lat: place.lat, lng: place.lng },
+            position: { lat: jitter(place.lat), lng: jitter(place.lng) },
             map: map,
             title: place.name,
         });
 
         const info = new google.maps.InfoWindow({
-            content: `<strong>${place.name}</strong>`
+            content: `<strong>${place.name}</strong> <br> Every ${place.day} at ${place.time}`
         });
 
         marker.addListener("click", () => info.open(map, marker));
@@ -76,6 +76,10 @@ function initMap(centerLat, centerLng, zoom = 12) {
     });
 
     updateCenterMarker();
+}
+
+function jitter(coord) {
+    return coord + (Math.random() - 0.5) * 0.0002;
 }
 
 function updateCenterMarker() {
