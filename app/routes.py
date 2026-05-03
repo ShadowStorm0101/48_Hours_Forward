@@ -256,15 +256,27 @@ def map():
     services = (
         query
         .order_by(distance)
-        .limit(15)
+        .limit(50)
         .all()
     )
+
+    DAY_MAP = {
+        0: "Monday",
+        1: "Tuesday",
+        2: "Wednesday",
+        3: "Thursday",
+        4: "Friday",
+        5: "Saturday",
+        6: "Sunday",
+    }
 
     places = [
         {
             "name": s.LocationService.name,
             "lat": s.LocationService.lat,
             "lng": s.LocationService.lng,
+            "day": DAY_MAP[s.LocationService.day],
+            "time": s.LocationService.time.strftime("%H:%M"),
             "is_alcohol": s.LocationService.is_alcohol,
             "is_narcotics": s.LocationService.is_narcotics,
             "is_nicotine": s.LocationService.is_nicotine,
