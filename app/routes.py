@@ -1,16 +1,22 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import joinedload
 
 from . import db
-from .models import User, Post, LocationService, JournalEntry
+
+from .models import User, LocationService, Resource
+from .utils.email_notifications import send_checkin_reminder_email
+
+from .models import User
+
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
+
 
 main = Blueprint("main", __name__)
 
@@ -31,6 +37,19 @@ def _current_user() -> User | None:
         return None
     return User.query.get(uid)
 
+# calculate days/months etc of delta
+def get_delta(delta):
+    days = delta.days
+    hours = delta.seconds // 3600
+    minutes = (delta.seconds % 3600) // 60
+    seconds = delta.seconds // 60
+    remaining_days = (days % 365) % 30
+
+    current_narcotics_streak = f"{remaining_days} days  {hours} hours  {minutes} minutes {seconds} seconds"
+
+    return current_narcotics_streak
+
+
 @main.route("/")
 def home():
     # If already logged in, skip landing page
@@ -45,7 +64,6 @@ def register():
         raw_public_username = request.form.get("public_username", "")
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
-        raw_bio = request.form.get("bio", "")
 
         ip = request.remote_addr or "unknown"
         ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -54,7 +72,6 @@ def register():
             public_username = validate_username(raw_public_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
-            bio = validate_bio(raw_bio)
         except ValueError as e:
             flash(str(e), "error")
             security_logger.warning("REGISTER FAILED at %s ip=%s email=%r reason=%s", ts, ip, raw_email, str(e))
@@ -69,13 +86,11 @@ def register():
             flash("That username is taken. Choose another.", "error")
             return render_template("register.html")
 
-        safe_bio = sanitize_html(bio) if bio else ""
-        encrypted_bio = encrypt_bio(safe_bio, current_app.config["BIO_ENCRYPTION_KEY"]) if safe_bio else None
 
         pepper = current_app.config["PASSWORD_PEPPER"]
-        pw_hash = hash_password(password, pepper)
+        password_hash = hash_password(password, pepper)
 
-        user = User(username=public_username, email=email, password=pw_hash, role="user", bio=encrypted_bio)
+        user = User(username=public_username, email=email, password_hash=password_hash, role="user", alcohol_streak_start=None, narcotics_streak_start=None, nicotine_streak_start=None)
         db.session.add(user)
         db.session.commit()
 
@@ -100,7 +115,10 @@ def login():
 
         user = User.query.filter_by(email=raw_email.strip()).first()
 
-        if user and verify_password(raw_password.strip(), user.password, current_app.config["PASSWORD_PEPPER"]):
+        if user and verify_password(raw_password.strip(), user.password_hash, current_app.config["PASSWORD_PEPPER"]):
+            user.last_login_at = datetime.utcnow()
+            db.session.commit()
+
             session["user_id"] = user.id
             session["role"] = user.role
             flash(f"Logged in as {user.username}", "success")
@@ -125,16 +143,40 @@ def dashboard():
         flash("Please log in first.", "error")
         return redirect(url_for("main.login"))
 
-    # Optional: load posts (safe default)
-    posts = (
-        Post.query.options(joinedload(Post.author))
-        .order_by(Post.created_at.desc())
-        .limit(25)
-        .all()
-    )
 
-    # Your dashboard.html currently only uses role, but keeping posts ready is useful later.
-    return render_template("dashboard.html", role=user.role, posts=posts, user=user)
+
+    # Calculating streak, now minus streak start
+    if user.alcohol_streak_start is not None:
+        delta = datetime.utcnow() - user.alcohol_streak_start
+        current_alcohol_streak = get_delta(delta)
+    else:
+        current_alcohol_streak = None
+
+    if user.nicotine_streak_start is not None:
+        delta = datetime.utcnow() - user.nicotine_streak_start
+        current_nicotine_streak = get_delta(delta)
+    else:
+        current_nicotine_streak = None
+
+    if user.narcotics_streak_start is not None:
+        delta = datetime.utcnow() - user.narcotics_streak_start
+        current_narcotics_streak = get_delta(delta)
+    else:
+        current_narcotics_streak = None
+
+    edit = request.args.get("edit")
+
+
+    # Your dashboard.html currently only uses role, but keeping posts ready is useful later. *What does this mean-zak*
+    # passing streaks - zak
+    return render_template(
+        "dashboard.html",
+        user=user,
+        current_alcohol_streak=current_alcohol_streak,
+        current_nicotine_streak=current_nicotine_streak,
+        current_narcotics_streak=current_narcotics_streak,
+        edit=edit
+    )
 
 @main.route("/logout")
 @login_required
@@ -143,118 +185,33 @@ def logout():
     flash("Logged out.", "success")
     return redirect(url_for("main.login"))
 
-
-
-
 @main.route("/journal")
 @login_required
 def journal():
-    user = _current_user()
-    if not user:
-        flash("Please log in first.", "error")
-        return redirect(url_for("main.login"))
-
-    selected_entry_id = request.args.get("entry_id", type=int)
-
-    entries = (
-        JournalEntry.query
-        .filter_by(user_id=user.id)
-        .order_by(JournalEntry.updated_at.desc())
-        .all())
-
-    favourites = [entry for entry in entries if entry.is_favourite]
-    recent = [entry for entry in entries if not entry.is_favourite]
-
-    active_entry = None
-    if entries:
-        if selected_entry_id is not None:
-            active_entry = next((entry for entry in entries if entry.id == selected_entry_id), None)
-        if active_entry is None:
-            active_entry = entries[0]
-
-    return render_template("journal.html",
-        favourites=favourites,
-        recent=recent,
-        active_entry=active_entry)
-
-@main.route("/journal/new", methods=["POST"])
-@login_required
-def create_journal_entry():
-    user = _current_user()
-    if not user:
-        flash("Please log in first.", "error")
-        return redirect(url_for("main.login"))
-
-    entry = JournalEntry(
-        title="New Entry",
-        content="",
-        user_id=user.id,
-        is_favourite=False)
-    db.session.add(entry)
-    db.session.commit()
-
-    return redirect(url_for("main.journal", entry_id=entry.id))
-
-@main.route("/journal/<int:entry_id>/save", methods=["POST"])
-@login_required
-def save_journal_entry(entry_id):
-    user = _current_user()
-    if not user:
-        flash("Please log in first.", "error")
-        return redirect(url_for("main.login"))
-
-    entry = JournalEntry.query.filter_by(id=entry_id, user_id=user.id).first_or_404()
-
-    raw_title = request.form.get("title", "").strip()
-    raw_content = request.form.get("content", "").strip()
-
-    entry.title = raw_title[:120] if raw_title else "Untitled"
-    entry.content = sanitize_html(raw_content)
-
-    db.session.commit()
-    flash("Journal entry saved.", "success")
-    return redirect(url_for("main.journal", entry_id=entry.id))
-
-
-@main.route("/journal/<int:entry_id>/toggle-favourite", methods=["POST"])
-@login_required
-def toggle_journal_favourite(entry_id):
-    user = _current_user()
-    if not user:
-        flash("Please log in first.", "error")
-        return redirect(url_for("main.login"))
-
-    entry = JournalEntry.query.filter_by(id=entry_id, user_id=user.id).first_or_404()
-    entry.is_favourite = not entry.is_favourite
-    db.session.commit()
-
-    return redirect(url_for("main.journal", entry_id=entry.id))
-
-@main.route("/journal/<int:entry_id>/delete", methods=["POST"])
-@login_required
-def delete_journal_entry(entry_id):
-    user = _current_user()
-    if not user:
-        flash("Please log in first.", "error")
-        return redirect(url_for("main.login"))
-
-    entry = JournalEntry.query.filter_by(id=entry_id, user_id=user.id).first_or_404()
-
-    db.session.delete(entry)
-    db.session.commit()
-
-    flash("Journal entry deleted.", "success")
-    return redirect(url_for("main.journal"))
-
-
-
-
-
+    return render_template("journal.html")
 
 @main.route("/resources")
 @login_required
 def resources():
-    return render_template("resources.html")
+
+    alcohol_resources = Resource.query.filter_by(
+        is_alcohol=True
+    ).all()
+
+    nicotine_resources = Resource.query.filter_by(
+        is_nicotine=True
+    ).all()
+
+    narcotics_resources = Resource.query.filter_by(
+        is_narcotics=True
+    ).all()
+
+    return render_template(
+        "resources.html",
+        alcohol_resources=alcohol_resources,
+        nicotine_resources=nicotine_resources,
+        narcotics_resources=narcotics_resources
+    )
 
 @main.route("/map")
 @login_required
@@ -264,6 +221,18 @@ def map():
     if (user_lat == None or user_lng == None):
         user_lat = 54.9783
         user_lng = -1.6178
+
+    user = _current_user()
+    conditions = []
+
+    if user.alcohol_streak_start is not None:
+        conditions.append(LocationService.is_alcohol.is_(True))
+
+    if user.nicotine_streak_start is not None:
+        conditions.append(LocationService.is_nicotine.is_(True))
+
+    if user.narcotics_streak_start is not None:
+        conditions.append(LocationService.is_narcotics.is_(True))
 
     R = 6371 #Earths circumference km
 
@@ -277,19 +246,37 @@ def map():
         func.sin(func.radians(LocationService.lat))
     )
     ).label("distance")
+    total_in_db = LocationService.query.count()
+    current_app.logger.warning(f"🗺️ MAP DEBUG: Total location services in DB: {total_in_db}")
+    query = db.session.query(LocationService, distance)
+
+    if conditions:
+        query = query.filter(or_(*conditions))
 
     services = (
-        db.session.query(LocationService, distance)
+        query
         .order_by(distance)
-        .limit(15)
+        .limit(50)
         .all()
     )
+
+    DAY_MAP = {
+        0: "Monday",
+        1: "Tuesday",
+        2: "Wednesday",
+        3: "Thursday",
+        4: "Friday",
+        5: "Saturday",
+        6: "Sunday",
+    }
 
     places = [
         {
             "name": s.LocationService.name,
             "lat": s.LocationService.lat,
             "lng": s.LocationService.lng,
+            "day": DAY_MAP[s.LocationService.day],
+            "time": s.LocationService.time.strftime("%H:%M"),
             "is_alcohol": s.LocationService.is_alcohol,
             "is_narcotics": s.LocationService.is_narcotics,
             "is_nicotine": s.LocationService.is_nicotine,
@@ -323,24 +310,73 @@ def update_habits():
         return redirect(url_for("main.login"))
 
     selected = request.form.getlist("habits")
+    print("selected habits:", selected)
 
-    # Reset all
-    user.alcohol = False
-    user.smoking = False
-    user.narcotics = False
-
-    # Apply choices
+    # Apply choices, Also need to call function to start addiction time
     if "alcohol" in selected:
-        user.alcohol = True
-    if "smoking" in selected:
-        user.smoking = True
+        if user.alcohol_streak_start is None:
+            user.alcohol_streak_start = datetime.utcnow()
+    else:
+        user.alcohol_streak_start = None
+
+    if "nicotine" in selected:
+        if user.nicotine_streak_start is None:
+            user.nicotine_streak_start = datetime.utcnow()
+    else:
+        user.nicotine_streak_start = None
+
     if "narcotics" in selected:
-        user.narcotics = True
+        if user.narcotics_streak_start is None:
+            user.narcotics_streak_start = datetime.utcnow()
+    else:
+        user.narcotics_streak_start = None
 
     db.session.commit()
 
     flash("Preferences updated!", "success")
-    return redirect(url_for("main.profile"))
+
+
+    return redirect(url_for("main.dashboard"))
+
+@main.route("/reset")
+@login_required
+def reset():
+    user = _current_user()
+
+    #### If in the dashboard the addiction selected = *addiction type then*
+    # user.alcohol_streak_start_streak_start = datetime.utcnow()
+    # user.nicotine_streak_start = datetime.utcnow()
+    # user.narcotics_streak_start = datetime.utcnow()             # calls function to set datetime to now
+
+    db.session.commit()             # commit to db
+    return redirect(url_for("main.dashboard"))
+
+@main.route("/send-reminders")
+def send_reminders():
+    now = datetime.utcnow()
+
+    inactive_users = User.query.filter(
+        User.last_login_at != None,
+        User.last_login_at <= now - timedelta(days=1),
+        User.reminder_email_enabled == True
+    ).all()
+
+    emails_sent = 0
+
+    for user in inactive_users:
+        if (
+            user.last_reminder_sent_at is None
+            or user.last_reminder_sent_at <= now - timedelta(days=1)
+        ):
+            email_sent = send_checkin_reminder_email(user)
+
+            if email_sent:
+                user.last_reminder_sent_at = now
+                emails_sent += 1
+
+    db.session.commit()
+
+    return f"{emails_sent} reminder emails sent."
 
 @main.route("/help")
 @login_required

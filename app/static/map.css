@@ -1,11 +1,16 @@
   #flex_div {
       display: flex;
       gap: 20px;
-      height: 500px;
+      height: 650px;
   }
 
+  .page-title {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
   #map_div {
-      flex: 3;
+      flex: 5;
   }
 
   #map {
