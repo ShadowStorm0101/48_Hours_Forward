@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
-
 {% block content %}
 <h2>Dashboard</h2>
 
@@ -63,45 +62,70 @@
 {% else %}
 
   <div class="dashboard-box">
-    <h3>Tracking</h3>
 
-    <ul>
+    <div class="habit-card-container">
+
       {% if user.alcohol_streak_start is not none %}
-        <li>
-          Alcohol<br>
-          Current streak:
-          <span
-            class="live-streak"
-            data-start="{{ user.alcohol_streak_start.isoformat() }}Z"
-          ></span>
-          <p>{{ alcohol_milestone_message }}</p>
-        </li>
+        <div class="habit-card">
+          <div class="habit-title">Alcohol</div>
+
+          <div class="streak-box">
+            <p>Current streak:</p>
+            <span
+              class="live-streak"
+              data-start="{{ user.alcohol_streak_start.isoformat() }}Z"
+            ></span>
+          </div>
+
+          <div class="milestone-box">
+            <p>{{ alcohol_milestone_message }}</p>
+          </div>
+
+          <button class="reset-button" type="button">Reset</button>
+        </div>
       {% endif %}
 
       {% if user.nicotine_streak_start is not none %}
-        <li>
-          Nicotine<br>
-          Current streak:
-          <span
-            class="live-streak"
-            data-start="{{ user.nicotine_streak_start.isoformat() }}Z"
-          ></span>
-          <p>{{ nicotine_milestone_message }}</p>
-        </li>
+        <div class="habit-card">
+          <div class="habit-title">Nicotine</div>
+
+          <div class="streak-box">
+            <p>Current streak:</p>
+            <span
+              class="live-streak"
+              data-start="{{ user.nicotine_streak_start.isoformat() }}Z"
+            ></span>
+          </div>
+
+          <div class="milestone-box">
+            <p>{{ nicotine_milestone_message }}</p>
+          </div>
+
+          <button class="reset-button" type="button">Reset</button>
+        </div>
       {% endif %}
 
       {% if user.narcotics_streak_start is not none %}
-        <li>
-          Narcotics<br>
-          Current streak:
-          <span
-            class="live-streak"
-            data-start="{{ user.narcotics_streak_start.isoformat() }}Z"
-          ></span>
-          <p>{{ narcotics_milestone_message }}</p>
-        </li>
+        <div class="habit-card">
+          <div class="habit-title">Narcotics</div>
+
+          <div class="streak-box">
+            <p>Current streak:</p>
+            <span
+              class="live-streak"
+              data-start="{{ user.narcotics_streak_start.isoformat() }}Z"
+            ></span>
+          </div>
+
+          <div class="milestone-box">
+            <p>{{ narcotics_milestone_message }}</p>
+          </div>
+
+          <button class="reset-button" type="button">Reset</button>
+        </div>
       {% endif %}
-    </ul>
+
+    </div>
 
     <a href="{{ url_for('main.dashboard', edit='true') }}">Update Habits</a>
   </div>
