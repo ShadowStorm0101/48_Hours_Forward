@@ -14,6 +14,12 @@
   padding: 14px;
   text-align: center;
   background-color: white;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  transition: box-shadow 0.3s ease-in-out;
 }
 
 .habit-title {
@@ -47,8 +53,27 @@
   border-radius: 14px;
   background-color: white;
   cursor: pointer;
+  margin: 0 auto;
 }
 
 .reset-button:hover {
   background-color: #eef2f7;
+}
+
+.flame-icon {
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+/* flame look */
+.flame-svg {
+  width: 28px;
+  height: 28px;
+  animation: flame-bounce 1s infinite;
+  filter: none;
+}
+
+@keyframes flame-bounce {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }

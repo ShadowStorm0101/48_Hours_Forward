@@ -66,7 +66,7 @@
     <div class="habit-card-container">
 
       {% if user.alcohol_streak_start is not none %}
-        <div class="habit-card">
+        <div class="habit-card" data-start="{{ user.alcohol_streak_start.isoformat() }}Z">
           <div class="habit-title">Alcohol</div>
 
           <div class="streak-box">
@@ -82,11 +82,19 @@
           </div>
 
           <button class="reset-button" type="button">Reset</button>
+
+          <div class="flame-icon">
+            <svg viewBox="0 0 24 24" class="flame-svg">
+                <path d="M12 2C10 6 6 9 6 14a6 6 0 0012 0c0-4-4-7-6-12z"/>
+            </svg>
+          </div>
+
         </div>
+
       {% endif %}
 
       {% if user.nicotine_streak_start is not none %}
-        <div class="habit-card">
+        <div class="habit-card" data-start="{{ user.nicotine_streak_start.isoformat() }}Z">
           <div class="habit-title">Nicotine</div>
 
           <div class="streak-box">
@@ -102,11 +110,18 @@
           </div>
 
           <button class="reset-button" type="button">Reset</button>
+
+            <div class="flame-icon">
+                <svg viewBox="0 0 24 24" class="flame-svg">
+                    <path d="M12 2C10 6 6 9 6 14a6 6 0 0012 0c0-4-4-7-6-12z"/>
+                </svg>
+            </div>
+
         </div>
       {% endif %}
 
       {% if user.narcotics_streak_start is not none %}
-        <div class="habit-card">
+        <div class="habit-card" data-start="{{ user.narcotics_streak_start.isoformat() }}Z">
           <div class="habit-title">Narcotics</div>
 
           <div class="streak-box">
@@ -122,6 +137,13 @@
           </div>
 
           <button class="reset-button" type="button">Reset</button>
+
+          <div class="flame-icon">
+            <svg viewBox="0 0 24 24" class="flame-svg">
+                <path d="M12 2C10 6 6 9 6 14a6 6 0 0012 0c0-4-4-7-6-12z"/>
+            </svg>
+          </div>
+
         </div>
       {% endif %}
 
@@ -174,10 +196,55 @@
       });
     }
 
+    // flame system
+    const flameLevels = [
+        { days: 90, class: "flame-black", color: "black" },
+        { days: 30, class: "flame-purple", color: "purple" },
+        { days: 7,  class: "flame-red", color: "red" },
+        { days: 1,  class: "flame-orange", color: "orange" },
+        { days: 0,  class: "flame-yellow", color: "yellow" }
+    ];
+
+    function applyFlameEffects() {
+        document.querySelectorAll(".habit-card").forEach(card => {
+            const flame = card.querySelector(".flame-svg");
+
+            const start = new Date(card.dataset.start);
+            const days = (new Date() - start) / 86400000;
+
+            // remove all flame classes
+            card.classList.remove(...flameLevels.map(f => f.class));
+
+            // find correct level
+            const level = flameLevels.find(f => days >= f.days);
+
+            if (level) {
+                card.classList.add(level.class);
+                if (flame) flame.style.fill = level.color;
+            }
+        });
+    }
+
     updateStreaks();
-    setInterval(updateStreaks, 1000);
+    applyFlameEffects();
+
+    setInterval(() => {
+        updateStreaks();
+        applyFlameEffects();
+    }, 1000);
+
+
+    document.querySelectorAll(".reset-button").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const card = this.closest(".habit-card");
+            card.dataset.start = new Date().toISOString();
+            applyFlameEffects();
+        });
+    });
+
   </script>
 
 {% endif %}
 
 {% endblock %}
+
