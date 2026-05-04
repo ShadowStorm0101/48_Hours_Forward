@@ -1,4 +1,5 @@
 import logging
+import random
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -16,7 +17,7 @@ from .models import User
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
-
+from .utils.email import send_verification_email
 
 main = Blueprint("main", __name__)
 
@@ -35,7 +36,12 @@ def _current_user() -> User | None:
     uid = session.get("user_id")
     if not uid:
         return None
-    return User.query.get(uid)
+
+    user = db.session.get(User, uid)
+    if not user:
+        session.clear()
+
+    return user
 
 
 
@@ -77,6 +83,10 @@ def register():
         ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
 
         try:
+            username = validate_username(request.form.get("public_username", ""))
+            email = validate_email(request.form.get("email", ""))
+            password = validate_password(request.form.get("password", ""), username=email)
+            bio = validate_bio(request.form.get("bio", ""))
             public_username = validate_username(raw_public_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
@@ -87,7 +97,7 @@ def register():
 
         # uniqueness checks
         if User.query.filter_by(email=email).first():
-            flash("Email already registered. Please log in.", "error")
+            flash("Email already exists", "error")
             return redirect(url_for("main.login"))
 
         if User.query.filter_by(username=public_username).first():
@@ -98,15 +108,107 @@ def register():
         pepper = current_app.config["PASSWORD_PEPPER"]
         password_hash = hash_password(password, pepper)
 
+        code = str(random.randint(100000, 999999))
+
+        user = User(
+            username=username,
+            email=email,
+            password=pw_hash,
+            bio=encrypt_bio(bio, current_app.config["BIO_ENCRYPTION_KEY"]) if bio else None,
+            verification_code=code,
+            verification_expiry=datetime.utcnow() + timedelta(minutes=5),
+            is_verified=False
+        )
+
         user = User(username=public_username, email=email, password_hash=password_hash, role="user", alcohol_streak_start=None, narcotics_streak_start=None, nicotine_streak_start=None)
         db.session.add(user)
         db.session.commit()
 
-        flash("Registration successful. Please log in.", "success")
-        security_logger.info("REGISTER SUCCESS at %s ip=%s user_id=%s username=%r", ts, ip, user.id, user.username)
-        return redirect(url_for("main.login"))
+        # Store email in session
+        session["verify_email"] = email
+
+        send_verification_email(email, code)
+
+        flash("Verification code sent!", "success")
+        return redirect(url_for("main.verify"))
 
     return render_template("register.html")
+
+@main.route("/verify", methods=["GET", "POST"])
+def verify():
+    email = session.get("verify_email")
+
+    if not email:
+        flash("Session expired. Register again.", "error")
+        return redirect(url_for("main.register"))
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.register"))
+
+    if request.method == "POST":
+        code = request.form.get("code")
+
+        if datetime.utcnow() > user.verification_expiry:
+            flash("Code expired", "error")
+            return redirect(url_for("main.register"))
+
+        if user.verification_code != code:
+            flash("Invalid code", "error")
+            return render_template("verify.html")
+
+        user.is_verified = True
+        user.verification_code = None
+        user.verification_expiry = None
+
+        db.session.commit()
+
+        session.pop("verify_email", None)
+        session["onboarding_user"] = user.id
+
+        flash("Email verified", "success")
+        return redirect(url_for("main.onboarding"))
+
+    return render_template("verify.html")
+
+
+@main.route("/onboarding", methods=["GET", "POST"])
+def onboarding():
+    user_id= session.get("onboarding_user")
+
+    if not user_id:
+        flash("Session expired. please register again.", "error")
+        return redirect(url_for("main.register"))
+
+    user = db.session.get(User,user_id)
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.register"))
+
+    if request.method == "POST":
+        gender = request.form.get("gender")
+        age = request.form.get("age")
+        addictions = request.form.getlist("addictions")
+
+        user.gender = gender
+        user.age = int(age) if age else None
+
+        user.alcohol = "alcohol" in addictions
+        user.smoking = "smoking" in addictions
+        user.narcotics = "narcotics" in addictions
+
+        db.session.commit()
+
+        session.pop("onboarding_user", None)
+
+        flash("Profile setup complete!", "success")
+        return redirect(url_for("main.login"))
+
+    return render_template("onboarding.html")
+
 
 @main.route("/login", methods=["GET", "POST"])
 def login():

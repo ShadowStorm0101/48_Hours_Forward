@@ -1,10 +1,12 @@
+
 from __future__ import annotations
 import csv
 import os
-from typing import List
+from typing import List, Optional
 
 from flask import current_app
 from . import db
+from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean, true
 from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, time
@@ -30,6 +32,24 @@ class User(db.Model):
     last_reminder_sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     reminder_email_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    bio: Mapped[Optional[str]] = mapped_column(String(1200), nullable=True)
+
+    alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
+    smoking: Mapped[bool] = mapped_column(Boolean, default=False)
+    narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    gender: Mapped[Optional[bool]] = mapped_column(String(20), default=False)
+    age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    verification_code: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
+    verification_expiry: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    posts: Mapped[List["Post"]] = relationship(
+        "Post",
+        back_populates="author",
+        cascade="all, delete-orphan"
+    )
     journal_entries: Mapped[List["JournalEntry"]] = relationship("JournalEntry", back_populates="user",
                                                                  cascade="all, delete-orphan")
 
@@ -61,9 +81,8 @@ class LocationService(db.Model):
     day: Mapped[int] = mapped_column(Integer, index=True, nullable=False) #0=Mon, 1=Tue etc
     time: Mapped[time] = mapped_column(Time, index=True, nullable=False)
 
-    is_alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_nicotine: Mapped[bool] = mapped_column(Boolean, default=False)
+    author_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    author: Mapped["User"] = relationship("User", back_populates="posts")
 
 class Resource(db.Model):
     __tablename__ = "resources"
@@ -86,6 +105,22 @@ def seed_data():
 
     pepper = current_app.config["PASSWORD_PEPPER"]
 
+    if User.query.count() == 0:
+        admin = User(
+            username="admin",
+            email="admin@example.com",
+            password=hash_password("Admin123!AAA", pepper),
+            role="admin",
+            is_verified=True
+        )
+
+        user1 = User(
+            username="user1",
+            email="user1@example.com",
+            password=hash_password("User123!AAAA1", pepper),
+            role="user",
+            is_verified=True
+        )
     # up until last session commit
     # if User.query.count() == 0:
     admin = User(
@@ -125,7 +160,6 @@ def seed_data():
         nicotine_streak_start=None
     )
 
-    db.session.add_all([admin, moderator, user1, user2])
     db.session.commit()
     seed_resources()
 
