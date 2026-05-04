@@ -4,14 +4,14 @@
 
 {% block content %}
 
-<h1 class="page-title" >Profile</h1>
+<h1 class="page-title">Profile</h1>
 
   <!-- LOGOUT -->
   <a href="{{ url_for('main.logout') }}">
     <button class="main-btn">Log Out</button>
   </a>
 
- <!-- USER INFO -->
+  <!-- USER INFO -->
   <div class="input-group">
     <label>First Name:</label>
     <input type="text" value="{{ user.username }}" disabled>
@@ -24,37 +24,53 @@
 
   <!-- HABITS FORM -->
   <form method="POST" action="{{ url_for('main.update_habits') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="habit-container">
 
-      <button type="submit" name="habit" value="alcohol"
-        class="habit-btn {% if user.alcohol %}active{% endif %}">
+      <button type="button"
+        class="habit-btn {% if user.alcohol_streak_start %}active{% endif %}"
+        onclick="toggleHabit(this, 'alcohol')">
         Alcohol
       </button>
+      <input type="checkbox" name="habits" value="alcohol"
+        {% if user.alcohol_streak_start %}checked{% endif %}
+        style="display:none" id="cb-alcohol">
 
-      <button type="submit" name="habit" value="nicotine"
-        class="habit-btn {% if user.smoking %}active{% endif %}">
+      <button type="button"
+        class="habit-btn {% if user.nicotine_streak_start %}active{% endif %}"
+        onclick="toggleHabit(this, 'nicotine')">
         Nicotine
       </button>
+      <input type="checkbox" name="habits" value="nicotine"
+        {% if user.nicotine_streak_start %}checked{% endif %}
+        style="display:none" id="cb-nicotine">
 
-      <button type="submit" name="habit" value="narcotics"
-        class="habit-btn {% if user.narcotics %}active{% endif %}">
+      <button type="button"
+        class="habit-btn {% if user.narcotics_streak_start %}active{% endif %}"
+        onclick="toggleHabit(this, 'narcotics')">
         Narcotics
       </button>
+      <input type="checkbox" name="habits" value="narcotics"
+        {% if user.narcotics_streak_start %}checked{% endif %}
+        style="display:none" id="cb-narcotics">
 
     </div>
 
-  </form>
+    <button type="submit" class="main-btn">Save Changes</button>
 
-  <!-- SAVE + PASSWORD -->
-  <button class="main-btn">Save Changes</button>
+  </form>
 
   <a href="{{ url_for('main.change_password') }}">
     <button class="main-btn">Change Password</button>
   </a>
 
-
-
-</div>
+  <script>
+    function toggleHabit(btn, name) {
+      const cb = document.getElementById("cb-" + name);
+      cb.checked = !cb.checked;
+      btn.classList.toggle("active", cb.checked);
+    }
+  </script>
 
 {% endblock %}

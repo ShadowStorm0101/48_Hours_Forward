@@ -528,7 +528,7 @@ def update_habits():
     flash("Preferences updated!", "success")
 
 
-    return redirect(url_for("main.dashboard"))
+    return redirect(url_for("main.profile"))
 
 @main.route("/reset")
 @login_required
