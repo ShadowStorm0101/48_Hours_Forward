@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h2>Dashboard</h2>
+<h1 class="page-title" >Dashboard</h1>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -70,7 +70,6 @@
           <div class="habit-title">Alcohol</div>
 
           <div class="streak-box">
-            <p>Current streak:</p>
             <span
               class="live-streak"
               data-start="{{ user.alcohol_streak_start.isoformat() }}Z"
@@ -90,7 +89,6 @@
           <div class="habit-title">Nicotine</div>
 
           <div class="streak-box">
-            <p>Current streak:</p>
             <span
               class="live-streak"
               data-start="{{ user.nicotine_streak_start.isoformat() }}Z"
@@ -110,7 +108,6 @@
           <div class="habit-title">Narcotics</div>
 
           <div class="streak-box">
-            <p>Current streak:</p>
             <span
               class="live-streak"
               data-start="{{ user.narcotics_streak_start.isoformat() }}Z"
@@ -143,23 +140,23 @@
       let minutes = Math.floor(totalSeconds / 60);
       let seconds = totalSeconds % 60;
 
-      if (days > 30) {
-        return `${days} days`;
-      }
+    if (days > 30) {
+     return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
+    }
 
-      if (days > 0) {
-        return `${days} days ${hours} hours`;
-      }
+    if (days > 0) {
+      return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
+    }
 
-      if (hours > 0) {
-        return `${hours} hours ${minutes} minutes`;
-      }
+    if (hours > 0) {
+      return `${hours} hours\n${minutes} minutes\n${seconds} seconds`;
+    }
 
-      if (minutes > 0) {
-        return `${minutes} minutes ${seconds} seconds`;
-      }
+    if (minutes > 0) {
+      return `${minutes} minutes\n${seconds} seconds`;
+    }
 
-      return `${seconds} seconds`;
+    return `${seconds} seconds`;
     }
 
     function updateStreaks() {

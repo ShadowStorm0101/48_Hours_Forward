@@ -5,10 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}48 Hours Forward{% endblock %}</title>
   
-  <link rel="stylesheet" href="../static/global.css">
+  <link rel="stylesheet" href="../static/main.css">
   {% block head %}{% endblock %}
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 <body>
   <script>
@@ -26,6 +25,15 @@
     <div class="nav-item"><a href="/profile">Profile</a></div>
     <div class="nav-item"><a href="/help">Help</a></div>
   </nav>
+
+  <script>
+  const path = window.location.pathname;
+  document.querySelectorAll('.nav-item a').forEach(link => {
+    if (link.getAttribute('href') === path) {
+      link.closest('.nav-item').classList.add('active');
+    }
+  });
+  </script>
 
   <div class="container">
     {% with messages = get_flashed_messages(with_categories=false) %}
