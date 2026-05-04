@@ -198,11 +198,11 @@
 
     // flame system
     const flameLevels = [
-        { days: 90, class: "flame-black", color: "black" },
-        { days: 30, class: "flame-purple", color: "purple" },
-        { days: 7,  class: "flame-red", color: "red" },
-        { days: 1,  class: "flame-orange", color: "orange" },
-        { days: 0,  class: "flame-yellow", color: "yellow" }
+        { min: 90, class: "flame-black", color: "black" },
+        { min: 30, class: "flame-purple", color: "purple" },
+        { min: 7,  class: "flame-red", color: "red" },
+        { min: 1,  class: "flame-orange", color: "orange" },
+        { min: 0,  class: "flame-yellow", color: "yellow" }
     ];
 
     function applyFlameEffects() {
@@ -210,13 +210,13 @@
             const flame = card.querySelector(".flame-svg");
 
             const start = new Date(card.dataset.start);
-            const days = (new Date() - start) / 86400000;
+            const days = Math.floor((new Date() - start) / 86400000);
 
             // remove all flame classes
             card.classList.remove(...flameLevels.map(f => f.class));
 
             // find correct level
-            const level = flameLevels.find(f => days >= f.days);
+            const level = flameLevels.find(f => days >= f.min);
 
             if (level) {
                 card.classList.add(level.class);
