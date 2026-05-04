@@ -86,7 +86,6 @@ def register():
             username = validate_username(request.form.get("public_username", ""))
             email = validate_email(request.form.get("email", ""))
             password = validate_password(request.form.get("password", ""), username=email)
-            bio = validate_bio(request.form.get("bio", ""))
             public_username = validate_username(raw_public_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
@@ -114,12 +113,13 @@ def register():
             username=username,
             email=email,
             password_hash=password_hash,
-            bio=encrypt_bio(bio, current_app.config["BIO_ENCRYPTION_KEY"]) if bio else None,
             verification_code=code,
-            is_verified=False
+            is_verified=False,
+            alcohol_streak_start=None,
+            narcotics_streak_start=None,
+            nicotine_streak_start=None
         )
 
-        user = User(username=public_username, email=email, password_hash=password_hash, role="user", alcohol_streak_start=None, narcotics_streak_start=None, nicotine_streak_start=None)
         db.session.add(user)
         db.session.commit()
 
@@ -191,9 +191,12 @@ def onboarding():
         user.gender = gender
         user.age = int(age) if age else None
 
-        user.alcohol = "alcohol" in addictions
-        user.smoking = "smoking" in addictions
-        user.narcotics = "narcotics" in addictions
+        if request.form.get("alcohol"):
+            user.alcohol_streak_start = datetime.utcnow()
+        if request.form.get("nicotine"):
+            user.nicotine_streak_start = datetime.utcnow()
+        if request.form.get("narcotics"):
+            user.narcotics_streak_start = datetime.utcnow()
 
         db.session.commit()
 

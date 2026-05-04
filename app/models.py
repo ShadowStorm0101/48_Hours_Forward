@@ -31,12 +31,6 @@ class User(db.Model):
     last_reminder_sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     reminder_email_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    bio: Mapped[Optional[str]] = mapped_column(String(1200), nullable=True)
-
-    alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
-    smoking: Mapped[bool] = mapped_column(Boolean, default=False)
-    narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
-
     gender: Mapped[Optional[bool]] = mapped_column(String(20), default=False)
     age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
