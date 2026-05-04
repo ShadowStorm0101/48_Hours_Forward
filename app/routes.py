@@ -43,17 +43,25 @@ def _current_user() -> User | None:
 
     return user
 
-# calculate days/months etc of delta
-def get_delta(delta):
-    days = delta.days
-    hours = delta.seconds // 3600
-    minutes = (delta.seconds % 3600) // 60
-    seconds = delta.seconds // 60
-    remaining_days = (days % 365) % 30
 
-    current_narcotics_streak = f"{remaining_days} days  {hours} hours  {minutes} minutes {seconds} seconds"
 
-    return current_narcotics_streak
+def distance_milestone(delta):
+    milestones = [1, 3, 7, 14, 30, 50, 100, 365, 1000]
+
+    for milestone in milestones:
+        if delta.days < milestone:
+            remaining = timedelta(days=milestone) - delta
+
+            total_hours = int(remaining.total_seconds() // 3600)
+            total_days = remaining.days
+
+            if total_hours <= 72:
+                return f"{total_hours} hours until your {milestone} day milestone!"
+
+            return f"{total_days} days until your {milestone} day milestone!"
+
+    return "All milestones achieved!"
+
 
 
 @main.route("/")
@@ -245,40 +253,42 @@ def dashboard():
         flash("Please log in first.", "error")
         return redirect(url_for("main.login"))
 
-
-
-    # Calculating streak, now minus streak start
+    # ALCOHOL
     if user.alcohol_streak_start is not None:
-        delta = datetime.utcnow() - user.alcohol_streak_start
-        current_alcohol_streak = get_delta(delta)
+        alcohol_delta = datetime.utcnow() - user.alcohol_streak_start
+        alcohol_milestone_message = distance_milestone(alcohol_delta)
     else:
         current_alcohol_streak = None
+        alcohol_milestone_message = None
 
+    # NICOTINE
     if user.nicotine_streak_start is not None:
-        delta = datetime.utcnow() - user.nicotine_streak_start
-        current_nicotine_streak = get_delta(delta)
+        nicotine_delta = datetime.utcnow() - user.nicotine_streak_start
+        nicotine_milestone_message = distance_milestone(nicotine_delta)
     else:
         current_nicotine_streak = None
+        nicotine_milestone_message = None
 
+    # NARCOTICS
     if user.narcotics_streak_start is not None:
-        delta = datetime.utcnow() - user.narcotics_streak_start
-        current_narcotics_streak = get_delta(delta)
+        narcotics_delta = datetime.utcnow() - user.narcotics_streak_start
+        narcotics_milestone_message = distance_milestone(narcotics_delta)
     else:
         current_narcotics_streak = None
+        narcotics_milestone_message = None
 
     edit = request.args.get("edit")
 
-
-    # Your dashboard.html currently only uses role, but keeping posts ready is useful later. *What does this mean-zak*
-    # passing streaks - zak
     return render_template(
         "dashboard.html",
         user=user,
-        current_alcohol_streak=current_alcohol_streak,
-        current_nicotine_streak=current_nicotine_streak,
-        current_narcotics_streak=current_narcotics_streak,
+        alcohol_milestone_message=alcohol_milestone_message,
+        nicotine_milestone_message=nicotine_milestone_message,
+        narcotics_milestone_message=narcotics_milestone_message,
         edit=edit
     )
+
+
 
 @main.route("/logout")
 @login_required

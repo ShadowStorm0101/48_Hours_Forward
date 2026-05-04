@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
-
 {% block content %}
 <h2>Dashboard</h2>
 
@@ -63,33 +62,121 @@
 {% else %}
 
   <div class="dashboard-box">
-    <h3>Tracking</h3>
 
-    <ul>
+    <div class="habit-card-container">
+
       {% if user.alcohol_streak_start is not none %}
-        <li>
-          Alcohol<br>
-          Current streak: {{ current_alcohol_streak }}
-        </li>
+        <div class="habit-card">
+          <div class="habit-title">Alcohol</div>
+
+          <div class="streak-box">
+            <p>Current streak:</p>
+            <span
+              class="live-streak"
+              data-start="{{ user.alcohol_streak_start.isoformat() }}Z"
+            ></span>
+          </div>
+
+          <div class="milestone-box">
+            <p>{{ alcohol_milestone_message }}</p>
+          </div>
+
+          <button class="reset-button" type="button">Reset</button>
+        </div>
       {% endif %}
 
       {% if user.nicotine_streak_start is not none %}
-        <li>
-          Nicotine<br>
-          Current streak: {{ current_nicotine_streak }}
-        </li>
+        <div class="habit-card">
+          <div class="habit-title">Nicotine</div>
+
+          <div class="streak-box">
+            <p>Current streak:</p>
+            <span
+              class="live-streak"
+              data-start="{{ user.nicotine_streak_start.isoformat() }}Z"
+            ></span>
+          </div>
+
+          <div class="milestone-box">
+            <p>{{ nicotine_milestone_message }}</p>
+          </div>
+
+          <button class="reset-button" type="button">Reset</button>
+        </div>
       {% endif %}
 
       {% if user.narcotics_streak_start is not none %}
-        <li>
-          Narcotics<br>
-          Current streak: {{ current_narcotics_streak }}
-        </li>
+        <div class="habit-card">
+          <div class="habit-title">Narcotics</div>
+
+          <div class="streak-box">
+            <p>Current streak:</p>
+            <span
+              class="live-streak"
+              data-start="{{ user.narcotics_streak_start.isoformat() }}Z"
+            ></span>
+          </div>
+
+          <div class="milestone-box">
+            <p>{{ narcotics_milestone_message }}</p>
+          </div>
+
+          <button class="reset-button" type="button">Reset</button>
+        </div>
       {% endif %}
-    </ul>
+
+    </div>
 
     <a href="{{ url_for('main.dashboard', edit='true') }}">Update Habits</a>
   </div>
+
+  <script>
+    function formatDelta(milliseconds) {
+      let totalSeconds = Math.floor(milliseconds / 1000);
+
+      let days = Math.floor(totalSeconds / 86400);
+      totalSeconds %= 86400;
+
+      let hours = Math.floor(totalSeconds / 3600);
+      totalSeconds %= 3600;
+
+      let minutes = Math.floor(totalSeconds / 60);
+      let seconds = totalSeconds % 60;
+
+      if (days > 30) {
+        return `${days} days`;
+      }
+
+      if (days > 0) {
+        return `${days} days ${hours} hours`;
+      }
+
+      if (hours > 0) {
+        return `${hours} hours ${minutes} minutes`;
+      }
+
+      if (minutes > 0) {
+        return `${minutes} minutes ${seconds} seconds`;
+      }
+
+      return `${seconds} seconds`;
+    }
+
+    function updateStreaks() {
+      const streakElements = document.querySelectorAll(".live-streak");
+
+      streakElements.forEach(function(element) {
+        const startTime = new Date(element.dataset.start);
+        const now = new Date();
+        const difference = now - startTime;
+
+        element.textContent = formatDelta(difference);
+      });
+    }
+
+    updateStreaks();
+    setInterval(updateStreaks, 1000);
+  </script>
 
 {% endif %}
 
