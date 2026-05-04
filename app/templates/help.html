@@ -1,29 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Help & Support</title>
-  <link rel="stylesheet" href="../static/global.css">
+{% extends 'base.html' %}
+
+{% block title %}Help & Support{% endblock %}
+
+{% block head %}
   <link rel="stylesheet" href="../static/help.css">
-</head>
-<body>
-  <script>
-    // check local storage high contrast preference and apply
-    if (localStorage.getItem('highContrast') === 'true') {
-      document.body.classList.add('high-contrast');
-    }
-  </script>
+{% endblock %}
 
-  <nav class="navbar">
-    <div class="nav-item"><a href="journal.html">Journal</a></div>
-    <div class="nav-item"><a href="dashboard.html">Dashboard</a></div>
-    <div class="nav-item"><a href="resources.html">Resources</a></div>
-    <div class="nav-item"><a href="map.html">Map</a></div>
-    <div class="nav-item"><a href="profile.html">Profile</a></div>
-    <div class="nav-item active"><a href="help.html">Help</a></div>
-  </nav>
-
+{% block content %}
   <div class="container" style="text-align: center;">
     <h1 class="page-title" style="margin-top: 0; padding-top: 20px;">Help & Support</h1>
   </div>
@@ -86,7 +69,9 @@
       </form>
     </div>
   </div>
+{% endblock %}
 
+{% block scripts %}
   <script>
     // Making sure that the submit buttons on the forms do not go onto formspree website and stays on the help page
     async function handleFormSubmit(event, statusElementId) {
@@ -133,12 +118,13 @@
     // High Contrast Mode Toggle
     const toggleBtn = document.getElementById('high-contrast-toggle');
 
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('high-contrast');
-      const isHighContrast = document.body.classList.contains('high-contrast');
-      localStorage.setItem('highContrast', isHighContrast);
-    });
+    // Make sure click event exists
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('high-contrast');
+        const isHighContrast = document.body.classList.contains('high-contrast');
+        localStorage.setItem('highContrast', isHighContrast);
+        });
+    }
   </script>
-  
-</body>
-</html>
+{% endblock %}
