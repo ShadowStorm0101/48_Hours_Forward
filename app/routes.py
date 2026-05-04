@@ -75,56 +75,37 @@ def home():
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        raw_public_username = request.form.get("public_username", "")
+        raw_username = request.form.get("public_username", "")
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
 
-        ip = request.remote_addr or "unknown"
-        ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-
         try:
-            username = validate_username(request.form.get("public_username", ""))
-            email = validate_email(request.form.get("email", ""))
-            password = validate_password(request.form.get("password", ""), username=email)
-            public_username = validate_username(raw_public_username)
+            username = validate_username(raw_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
         except ValueError as e:
             flash(str(e), "error")
-            security_logger.warning("REGISTER FAILED at %s ip=%s email=%r reason=%s", ts, ip, raw_email, str(e))
             return render_template("register.html")
 
-        # uniqueness checks
+        # uniqueness checks BEFORE proceeding
         if User.query.filter_by(email=email).first():
             flash("Email already exists", "error")
             return redirect(url_for("main.login"))
 
-        if User.query.filter_by(username=public_username).first():
-            flash("That username is taken. Choose another.", "error")
+        if User.query.filter_by(username=username).first():
+            flash("Username taken", "error")
             return render_template("register.html")
 
-
-        pepper = current_app.config["PASSWORD_PEPPER"]
-        password_hash = hash_password(password, pepper)
-
+        # generate verification code
         code = str(random.randint(100000, 999999))
 
-        user = User(
-            username=username,
-            email=email,
-            password_hash=password_hash,
-            verification_code=code,
-            is_verified=False,
-            alcohol_streak_start=None,
-            narcotics_streak_start=None,
-            nicotine_streak_start=None
-        )
-
-        db.session.add(user)
-        db.session.commit()
-
-        # Store email in session
-        session["verify_email"] = email
+        # store TEMP data in session (NOT DB)
+        session["pending_user"] = {
+            "username": username,
+            "email": email,
+            "password": password  # plain for now, hash later
+        }
+        session["verification_code"] = code
 
         send_verification_email(email, code)
 
@@ -135,35 +116,41 @@ def register():
 
 @main.route("/verify", methods=["GET", "POST"])
 def verify():
-    email = session.get("verify_email")
+    pending = session.get("pending_user")
+    code_expected = session.get("verification_code")
 
-    if not email:
+    if not pending or not code_expected:
         flash("Session expired. Register again.", "error")
         return redirect(url_for("main.register"))
 
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        flash("User not found", "error")
-        return redirect(url_for("main.register"))
-
     if request.method == "POST":
-        code = request.form.get("code")
+        code_input = request.form.get("code")
 
-
-        if user.verification_code != code:
+        if code_input != code_expected:
             flash("Invalid code", "error")
             return render_template("verify.html")
 
-        user.is_verified = True
-        user.verification_code = None
+        # ✅ NOW create user
+        pepper = current_app.config["PASSWORD_PEPPER"]
+        password_hash = hash_password(pending["password"], pepper)
 
+        user = User(
+            username=pending["username"],
+            email=pending["email"],
+            password_hash=password_hash,
+            is_verified=True
+        )
+
+        db.session.add(user)
         db.session.commit()
 
-        session.pop("verify_email", None)
+        # cleanup session
+        session.pop("pending_user", None)
+        session.pop("verification_code", None)
+
         session["onboarding_user"] = user.id
 
-        flash("Email verified", "success")
+        flash("Email verified!", "success")
         return redirect(url_for("main.onboarding"))
 
     return render_template("verify.html")
