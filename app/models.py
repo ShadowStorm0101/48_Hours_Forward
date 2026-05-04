@@ -2,7 +2,7 @@
 from __future__ import annotations
 import csv
 import os
-from typing import List
+from typing import List, Optional
 
 from flask import current_app
 from . import db
@@ -160,9 +160,6 @@ def seed_data():
         nicotine_streak_start=None
     )
 
-        db.session.add_all([admin, user1])
-        db.session.commit()
-    db.session.add_all([admin, moderator, user1, user2])
     db.session.commit()
     seed_resources()
 
