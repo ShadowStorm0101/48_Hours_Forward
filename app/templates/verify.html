@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Verify{% endblock %}
+
+{% block content %}
+<h2>Email Verification</h2>
+
+<form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <input type="text" name="code" placeholder="6-digit code" required><br><br>
+
+  <button class="nav-item">Verify</button>
+</form>
+
+{% endblock %}

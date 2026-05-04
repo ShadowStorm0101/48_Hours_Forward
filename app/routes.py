@@ -1,4 +1,5 @@
 import logging
+import random
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -16,7 +17,7 @@ from .models import User
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
-
+from .utils.email import send_verification_email
 
 main = Blueprint("main", __name__)
 
@@ -35,19 +36,32 @@ def _current_user() -> User | None:
     uid = session.get("user_id")
     if not uid:
         return None
-    return User.query.get(uid)
 
-# calculate days/months etc of delta
-def get_delta(delta):
-    days = delta.days
-    hours = delta.seconds // 3600
-    minutes = (delta.seconds % 3600) // 60
-    seconds = delta.seconds // 60
-    remaining_days = (days % 365) % 30
+    user = db.session.get(User, uid)
+    if not user:
+        session.clear()
 
-    current_narcotics_streak = f"{remaining_days} days  {hours} hours  {minutes} minutes {seconds} seconds"
+    return user
 
-    return current_narcotics_streak
+
+
+def distance_milestone(delta):
+    milestones = [1, 3, 7, 14, 30, 50, 100, 365, 1000]
+
+    for milestone in milestones:
+        if delta.days < milestone:
+            remaining = timedelta(days=milestone) - delta
+
+            total_hours = int(remaining.total_seconds() // 3600)
+            total_days = remaining.days
+
+            if total_hours <= 72:
+                return f"{total_hours} hours until your {milestone} day milestone!"
+
+            return f"{total_days} days until your {milestone} day milestone!"
+
+    return "All milestones achieved!"
+
 
 
 @main.route("/")
@@ -61,44 +75,125 @@ def home():
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        raw_public_username = request.form.get("public_username", "")
+        raw_username = request.form.get("public_username", "")
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
 
-        ip = request.remote_addr or "unknown"
-        ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-
         try:
-            public_username = validate_username(raw_public_username)
+            username = validate_username(raw_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
         except ValueError as e:
             flash(str(e), "error")
-            security_logger.warning("REGISTER FAILED at %s ip=%s email=%r reason=%s", ts, ip, raw_email, str(e))
             return render_template("register.html")
 
-        # uniqueness checks
+        # uniqueness checks BEFORE proceeding
         if User.query.filter_by(email=email).first():
-            flash("Email already registered. Please log in.", "error")
+            flash("Email already exists", "error")
             return redirect(url_for("main.login"))
 
-        if User.query.filter_by(username=public_username).first():
-            flash("That username is taken. Choose another.", "error")
+        if User.query.filter_by(username=username).first():
+            flash("Username taken", "error")
             return render_template("register.html")
 
+        # generate verification code
+        code = str(random.randint(100000, 999999))
 
+        # store TEMP data in session (NOT DB)
+        session["pending_user"] = {
+            "username": username,
+            "email": email,
+            "password": password  # plain for now, hash later
+        }
+        session["verification_code"] = code
+
+        send_verification_email(email, code)
+
+        flash("Verification code sent!", "success")
+        return redirect(url_for("main.verify"))
+
+    return render_template("register.html")
+
+@main.route("/verify", methods=["GET", "POST"])
+def verify():
+    pending = session.get("pending_user")
+    code_expected = session.get("verification_code")
+
+    if not pending or not code_expected:
+        flash("Session expired. Register again.", "error")
+        return redirect(url_for("main.register"))
+
+    if request.method == "POST":
+        code_input = request.form.get("code")
+
+        if code_input != code_expected:
+            flash("Invalid code", "error")
+            return render_template("verify.html")
+
+        # ✅ NOW create user
         pepper = current_app.config["PASSWORD_PEPPER"]
-        password_hash = hash_password(password, pepper)
+        password_hash = hash_password(pending["password"], pepper)
 
-        user = User(username=public_username, email=email, password_hash=password_hash, role="user", alcohol_streak_start=None, narcotics_streak_start=None, nicotine_streak_start=None)
+        user = User(
+            username=pending["username"],
+            email=pending["email"],
+            password_hash=password_hash,
+            is_verified=True
+        )
+
         db.session.add(user)
         db.session.commit()
 
-        flash("Registration successful. Please log in.", "success")
-        security_logger.info("REGISTER SUCCESS at %s ip=%s user_id=%s username=%r", ts, ip, user.id, user.username)
+        # cleanup session
+        session.pop("pending_user", None)
+        session.pop("verification_code", None)
+
+        session["onboarding_user"] = user.id
+
+        flash("Email verified!", "success")
+        return redirect(url_for("main.onboarding"))
+
+    return render_template("verify.html")
+
+
+@main.route("/onboarding", methods=["GET", "POST"])
+def onboarding():
+    user_id= session.get("onboarding_user")
+
+    if not user_id:
+        flash("Session expired. please register again.", "error")
+        return redirect(url_for("main.register"))
+
+    user = db.session.get(User,user_id)
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.register"))
+
+    if request.method == "POST":
+        gender = request.form.get("gender")
+        age = request.form.get("age")
+        addictions = request.form.getlist("addictions")
+
+        user.gender = gender
+        user.age = int(age) if age else None
+
+        if request.form.get("alcohol"):
+            user.alcohol_streak_start = datetime.utcnow()
+        if request.form.get("nicotine"):
+            user.nicotine_streak_start = datetime.utcnow()
+        if request.form.get("narcotics"):
+            user.narcotics_streak_start = datetime.utcnow()
+
+        db.session.commit()
+
+        session.pop("onboarding_user", None)
+
+        flash("Profile setup complete!", "success")
         return redirect(url_for("main.login"))
 
-    return render_template("register.html")
+    return render_template("onboarding.html")
+
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
@@ -143,40 +238,42 @@ def dashboard():
         flash("Please log in first.", "error")
         return redirect(url_for("main.login"))
 
-
-
-    # Calculating streak, now minus streak start
+    # ALCOHOL
     if user.alcohol_streak_start is not None:
-        delta = datetime.utcnow() - user.alcohol_streak_start
-        current_alcohol_streak = get_delta(delta)
+        alcohol_delta = datetime.utcnow() - user.alcohol_streak_start
+        alcohol_milestone_message = distance_milestone(alcohol_delta)
     else:
         current_alcohol_streak = None
+        alcohol_milestone_message = None
 
+    # NICOTINE
     if user.nicotine_streak_start is not None:
-        delta = datetime.utcnow() - user.nicotine_streak_start
-        current_nicotine_streak = get_delta(delta)
+        nicotine_delta = datetime.utcnow() - user.nicotine_streak_start
+        nicotine_milestone_message = distance_milestone(nicotine_delta)
     else:
         current_nicotine_streak = None
+        nicotine_milestone_message = None
 
+    # NARCOTICS
     if user.narcotics_streak_start is not None:
-        delta = datetime.utcnow() - user.narcotics_streak_start
-        current_narcotics_streak = get_delta(delta)
+        narcotics_delta = datetime.utcnow() - user.narcotics_streak_start
+        narcotics_milestone_message = distance_milestone(narcotics_delta)
     else:
         current_narcotics_streak = None
+        narcotics_milestone_message = None
 
     edit = request.args.get("edit")
 
-
-    # Your dashboard.html currently only uses role, but keeping posts ready is useful later. *What does this mean-zak*
-    # passing streaks - zak
     return render_template(
         "dashboard.html",
         user=user,
-        current_alcohol_streak=current_alcohol_streak,
-        current_nicotine_streak=current_nicotine_streak,
-        current_narcotics_streak=current_narcotics_streak,
+        alcohol_milestone_message=alcohol_milestone_message,
+        nicotine_milestone_message=nicotine_milestone_message,
+        narcotics_milestone_message=narcotics_milestone_message,
         edit=edit
     )
+
+
 
 @main.route("/logout")
 @login_required
