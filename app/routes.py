@@ -116,7 +116,6 @@ def register():
             password_hash=password_hash,
             bio=encrypt_bio(bio, current_app.config["BIO_ENCRYPTION_KEY"]) if bio else None,
             verification_code=code,
-            verification_expiry=datetime.utcnow() + timedelta(minutes=5),
             is_verified=False
         )
 
