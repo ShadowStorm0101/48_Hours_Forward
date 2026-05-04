@@ -81,7 +81,18 @@
             <p>{{ alcohol_milestone_message }}</p>
           </div>
 
-          <button class="reset-button" type="button">Reset</button>
+          <form method="POST" action="{{ url_for('main.reset_habit', habit='alcohol') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <button
+                class="reset-button"
+                type="submit"
+                onclick="return confirm('Reset Alcohol streak?')"
+              >Reset
+
+              </button>
+            </form>
+
         </div>
       {% endif %}
 
@@ -101,7 +112,17 @@
             <p>{{ nicotine_milestone_message }}</p>
           </div>
 
-          <button class="reset-button" type="button">Reset</button>
+          <form method="POST" action="{{ url_for('main.reset_habit', habit='nicotine') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <button
+              class="reset-button"
+              type="submit"
+              onclick="return confirm('Reset Nicotine streak?')"
+            >
+              Reset
+            </button>
+          </form>
         </div>
       {% endif %}
 
@@ -121,7 +142,17 @@
             <p>{{ narcotics_milestone_message }}</p>
           </div>
 
-          <button class="reset-button" type="button">Reset</button>
+          <form method="POST" action="{{ url_for('main.reset_habit', habit='narcotics') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <button
+              class="reset-button"
+              type="submit"
+              onclick="return confirm('Reset Narcotics streak?')"
+            >
+              Reset
+            </button>
+          </form>
         </div>
       {% endif %}
 
