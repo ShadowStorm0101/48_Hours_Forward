@@ -1,10 +1,9 @@
+
   .page-title {
   text-align: center;
   margin-bottom: 16px;
-}
+  }
 
-
-/*MAP PAGE START*/
   #map_flex_div {
       display: flex;
       gap: 20px;
@@ -20,7 +19,7 @@
       height: 100%;
   }
 
-  #map_services_frame {
+  #services_frame {
       flex: 1;
       overflow-y: auto;
       border: 1px solid #ccc;
@@ -29,7 +28,8 @@
       flex-direction: column;
       align-items: stretch; /* centers buttons horizontally inside container */
   }
-  #map_services_header{
+
+  #services_header{
       text-align: center;
   }
 
@@ -47,14 +47,12 @@
     gap: 10px;
 }
 
-.services-name{
+.services-left{
     flex:2;
     text-align: center;
 }
-.services-details{
+.services-right{
     flex:1;
     text-align: center;
 }
-
-/*MAP PAGE END*/
 
