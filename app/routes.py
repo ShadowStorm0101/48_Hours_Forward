@@ -113,7 +113,7 @@ def register():
         user = User(
             username=username,
             email=email,
-            password=pw_hash,
+            password_hash=password_hash,
             bio=encrypt_bio(bio, current_app.config["BIO_ENCRYPTION_KEY"]) if bio else None,
             verification_code=code,
             verification_expiry=datetime.utcnow() + timedelta(minutes=5),
@@ -151,9 +151,6 @@ def verify():
     if request.method == "POST":
         code = request.form.get("code")
 
-        if datetime.utcnow() > user.verification_expiry:
-            flash("Code expired", "error")
-            return redirect(url_for("main.register"))
 
         if user.verification_code != code:
             flash("Invalid code", "error")
@@ -161,7 +158,6 @@ def verify():
 
         user.is_verified = True
         user.verification_code = None
-        user.verification_expiry = None
 
         db.session.commit()
 

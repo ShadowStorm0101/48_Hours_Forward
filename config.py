@@ -40,3 +40,7 @@ class Config:
 
     EMAIL_USER = os.environ.get("EMAIL_USER")
     EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+
+    MAPS_API_KEY = os.environ.get(
+        "MAPS_API_KEY",
+        "AIzaSyAarCR8Cbq1519ANDXB0c4Czw7-LcEFCe8")
