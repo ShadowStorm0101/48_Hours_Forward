@@ -1,7 +1,7 @@
   #flex_div {
       display: flex;
       gap: 20px;
-      height: 650px;
+      height: 500px;
   }
 
   .page-title {
