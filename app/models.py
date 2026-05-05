@@ -9,7 +9,8 @@ from . import db
 from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean, true
 from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
+
 
 
 class User(db.Model):
@@ -99,27 +100,27 @@ def seed_data():
             email="admin@example.com",
             password_hash=hash_password("Admin123!AAA", pepper),
             role="admin",
-            alcohol_streak_start=None,
-            narcotics_streak_start=None,
-            nicotine_streak_start=None
+            alcohol_streak_start=datetime.utcnow() - timedelta(days=120),
+            narcotics_streak_start=datetime.utcnow() - timedelta(days=60),
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=13)
         )
         moderator = User(
             username="mod1",
             email="mod1@example.com",
             password_hash=hash_password("Mod123!AAAA1", pepper),
             role="moderator",
-            alcohol_streak_start=None,
+            alcohol_streak_start=datetime.utcnow() - timedelta(days=14, hours=5),
             narcotics_streak_start=None,
-            nicotine_streak_start=None
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=3, hours=2)
         )
         user1 = User(
             username="user1",
             email="user1@example.com",
             password_hash=hash_password("User123!AAAA1", pepper),
             role="user",
-            alcohol_streak_start=None,
+            alcohol_streak_start=datetime.utcnow() - timedelta(hours=15, minutes=20),
             narcotics_streak_start=None,
-            nicotine_streak_start=None
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=1, hours=1)
         )
         user2 = User(
             username="user2",
@@ -127,10 +128,11 @@ def seed_data():
             password_hash=hash_password("User456!AAAA1", pepper),
             role="user",
             alcohol_streak_start=None,
-            narcotics_streak_start=None,
-            nicotine_streak_start=None
+            narcotics_streak_start=datetime.utcnow() - timedelta(minutes=45),
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=30)
         )
 
+        db.session.add_all([admin, moderator, user1, user2])
     db.session.commit()
     seed_resources()
 

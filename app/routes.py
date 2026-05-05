@@ -3,7 +3,7 @@ import random
 from datetime import datetime, timedelta
 from functools import wraps
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, abort
 from sqlalchemy import func, or_
 from sqlalchemy.orm import joinedload
 
@@ -478,6 +478,8 @@ def map():
         .all()
     )
 
+
+
     DAY_MAP = {
         0: "Monday",
         1: "Tuesday",
@@ -505,7 +507,62 @@ def map():
 
     return render_template("map.html",
                            maps_api_key=current_app.config["MAPS_API_KEY"],
-                           places = places)
+                           places = places,
+                           user=user)
+
+
+@main.route("/add-location", methods=["POST"])
+@login_required
+def add_location():
+    user = _current_user()
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.login"))
+
+    if user.role != "admin":
+        abort(403)
+
+    else:
+        # data collected from form
+        name = request.form.get("name", "").strip()
+        lat = float(request.form.get("lat"))
+        lng = float(request.form.get("lng"))
+        day = int(request.form.get("day"))
+        time_raw = request.form.get("time", "")
+
+        is_alcohol = "is_alcohol" in request.form
+        is_narcotics = "is_narcotics" in request.form
+        is_nicotine = "is_nicotine" in request.form
+
+        # if fields not filled
+        if not name or lat is None or lng is None or day is None or not time_raw:
+            flash("Please fill in all required location fields.", "error")
+            return redirect(url_for("main.map"))
+
+        # using models.py class
+        location = LocationService(
+            name=name,
+            lat=lat,
+            lng=lng,
+            day=day,
+            time=datetime.strptime(time_raw, "%H:%M").time(),
+            is_alcohol=is_alcohol,
+            is_narcotics=is_narcotics,
+            is_nicotine=is_nicotine,
+        )
+
+        db.session.add(location)
+        db.session.commit()
+
+
+        flash("Location added successfully.", "success")
+        return redirect(url_for("main.map", lat=lat, lng=lng, zoom=16))
+
+
+
+
+
 
 @main.route("/profile")
 @login_required

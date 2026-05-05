@@ -9,6 +9,49 @@
 {% block content %}
 <h1 class="page-title" >Map</h1>
 
+
+
+{% if user.role == "admin" %}
+  <div id="add-location-form">
+  <h3>Add New Location</h3>
+
+  <form method="POST" action="{{ url_for('main.add_location') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <input type="text" name="name" placeholder="Location name" required>
+
+    <input type="number" step="any" name="lat" placeholder="Latitude" required>
+    <input type="number" step="any" name="lng" placeholder="Longitude" required>
+
+    <select name="day" required>
+      <option value="">Select day</option>
+      <option value="0">Monday</option>
+      <option value="1">Tuesday</option>
+      <option value="2">Wednesday</option>
+      <option value="3">Thursday</option>
+      <option value="4">Friday</option>
+      <option value="5">Saturday</option>
+      <option value="6">Sunday</option>
+    </select>
+
+    <input type="time" name="time" required>
+
+    <label><input type="checkbox" name="is_alcohol"> 🍺 Alcohol</label>
+    <label><input type="checkbox" name="is_narcotics"> 💊 Narcotics</label>
+    <label><input type="checkbox" name="is_nicotine"> 🚬 Nicotine</label>
+
+    <button type="submit">Add Location</button>
+  </form>
+  </div>
+{% endif %}
+
+
+
+
+
+
+
+
 <div id="flex_div">
   <div id="map_div">
       <div id="map"></div>
