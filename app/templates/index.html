@@ -1,17 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-    <link rel="stylesheet" href="../static/global.css">
-    <link rel="stylesheet" href="../static/index.css">
-</head>
-<body>
+{% block title %}Home{% endblock %}
 
-    <img src="static/images/logo.png" id="logo">
-    <a href="{{ url_for('main.login') }}" class="button">Login</a>
-    <a href="{{ url_for('main.register') }}"class="button">Sign Up</a>
+{% block head %}
+<link rel="stylesheet" href="../static/loginpages.css">
+{% endblock %}
 
-
-</body>
-</html>
+{% block content %}
+  <img src="{{ url_for('static', filename='images/logo.png') }}" id="logo">
+  <a href="{{ url_for('main.login') }}" class="button">Login</a>
+  <a href="{{ url_for('main.register') }}" class="button">Sign Up</a>
+{% endblock %}
