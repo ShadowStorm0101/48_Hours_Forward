@@ -1,0 +1,620 @@
+/* GENERAL */
+
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 0;
+  margin:0 auto 50px auto;
+  width:80%
+}
+
+.nav-item {
+  flex: 1;
+  padding: 0;
+  border: 2px solid #000000;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 400;
+  font-size: 24px;
+  transition: all 0.15s ease;
+}
+
+.nav-item a {
+  display: block;
+  padding: 9px 22px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+}
+
+.nav-item:hover {
+  background: #eef2f8;
+  border-color: #a8b8d0;
+  color: #1a1a1a;
+}
+
+.nav-item.active {
+  background: #b0c4de;
+  border-color: #b0c4de;
+  color: #1a2a3a;
+  font-weight: 500;
+  border: 2px solid #000000;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 16px;
+  }
+/* GENERAL END */
+
+/*JOURNAL START*/
+
+.journal-wrapper {
+  display: flex;
+  height: calc(100vh - 110px); /* adjust to match your nav height */
+  overflow: hidden;
+  border-top: 1px solid #ccc;
+}
+
+.journal-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+
+.sidebar-header {
+  padding: 0 16px 16px;
+}
+
+.create-new-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  border: 1.5px solid #5a6f8f;
+  background: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.create-new-btn:hover {
+  background: #f0f3f8;
+}
+
+.section-heading {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: underline;
+  margin: 12px 0 4px;
+  color: #222;
+}
+
+.journal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.journal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid #ddd;
+  font-size: 14px;
+  color: #222;
+  transition: background 0.1s;
+}
+
+.journal-item:hover {
+  background: #f0f3f8;
+}
+
+.journal-item.active {
+  background: #c7d4ea;
+}
+
+.item-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.journal-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+}
+
+.entry-date {
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #555;
+  border-right: 1px solid #ccc;
+  white-space: nowrap;
+  min-width: 90px;
+  text-align: center;
+}
+
+.entry-title-container {
+  flex: 1;
+  padding: 0 24px;
+}
+
+.entry-title-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 28px;
+  font-weight: 500;
+  color: #222;
+  background: transparent;
+  padding: 12px 0;
+}
+
+.entry-title {
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0;
+  padding: 12px 0;
+}
+
+.entry-content {
+  padding: 20px 30px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #222;
+}
+
+.entry-textarea {
+  width: 100%;
+  font-size: 15px;
+  line-height: 1.7;
+  padding: 16px;
+  color: #222;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 12px;
+  padding: 12px 30px;
+  border-top: 1px solid #eee;
+}
+
+.entry-btn {
+  padding: 8px 24px;
+  border-radius: 999px;
+  border: 1.5px solid #5a6f8f;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.entry-btn:hover {
+  background: #f0f3f8;
+}
+
+.entry-btn.danger {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.entry-btn.danger:hover {
+  background: #fdf0ee;
+}
+
+/*JOURNAL END*/
+
+/*DASHBOARD START*/
+.habit-card-container {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+  height:500px;
+}
+
+.habit-card {
+  width: 280px;
+  border: 2px solid #9aa8c0;
+  border-radius: 28px;
+  padding: 14px;
+  text-align: center;
+  background-color: white;
+}
+
+.habit-title {
+  border: 1px solid #9aa8c0;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.streak-box {
+  height: 300px;
+  border: 1px solid #9aa8c0;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.live-streak {
+  white-space: pre-line;
+  font-size: 30px;
+}
+
+.milestone-box {
+  border: 1px solid #9aa8c0;
+  padding: 14px;
+  min-height: 45px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.reset-button {
+  width: 120px;
+  padding: 6px;
+  border: 1px solid #9aa8c0;
+  border-radius: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: #eef2f7;
+}
+/*DASHBOARD END*/
+
+/*PROFILE START*/
+/*PROFILE END*/
+
+/*HELP START*/
+/*HELP END*/
+
+/* MAP PAGE START*/
+#map_flex_div {
+  display: flex;
+  gap: 20px;
+  height: 650px;
+}
+
+#map_div {
+  flex: 5;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+#map_services_frame {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* centers buttons horizontally inside container */
+}
+
+#map_services_header{
+  text-align: center;
+}
+
+.services_button {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+
+    display: flex;
+    justify-content: space-between; /* pushes left/right apart */
+    align-items: center;
+
+    text-align: left;
+    gap: 10px;
+}
+
+.services-name{
+    flex:2;
+    text-align: center;
+}
+.services-details{
+    flex:1;
+    text-align: center;
+}
+/*MAP PAGE END*/
+
+/*RESOURCE PAGE END*/
+/* Page layout */
+.resources-page {
+  margin-top: 5px;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Section spacing */
+.resource-section {
+  margin-bottom: 18px;
+}
+
+/* Section heading (Alcohol / Nicotine / Narcotics) */
+.resource-heading-wrap {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.resource-heading {
+  display: inline-block;
+  padding: 4px 24px;
+  border: 1px solid #5a6f8f;
+  background-color: #efefef;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Row container (arrows + scroll area) */
+.resource-row-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Left / right scroll buttons */
+.scroll-btn {
+  width: 42px;
+  height: 82px;
+  border-radius: 18px;
+  border: 1px solid #5a6f8f;
+  background-color: #efefef;
+  cursor: pointer;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.scroll-btn:hover {
+  background-color: #dfe7f5;
+}
+
+/* Scrollable row */
+.resource-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px 14px;
+  border: 1px solid #5a6f8f;
+  border-radius: 20px;
+  background-color: #f6f6f6;
+  width: 100%;
+  max-width: 900px;
+
+  /* Hide scrollbar */
+  scrollbar-width: none;
+}
+
+.resource-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Individual resource cards */
+.resource-card {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+  height: 110px;
+  border: 1px solid #5a6f8f;
+  border-radius: 16px;
+  background-color: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+  text-decoration: none;
+  color: #111;
+  line-height: 1.2;
+  flex-shrink: 0;
+  word-break: break-word;
+}
+
+.resource-card:hover {
+  background-color: #dfe7f5;
+  color: #111;
+}
+
+/*RESOURCE PAGE END*/
+
+/* ─── Profile Page ─── */
+
+.main-btn {
+  margin: 10px auto;
+  display: block;
+  width: 280px;
+  padding: 14px 40px;
+  border-radius: 999px;
+  border: 1px solid #5a6f8f;
+  background-color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.main-btn:hover {
+  background-color: #f0f3f8;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 280px;
+  margin: 10px auto;
+}
+
+.input-group label {
+  text-align: right;
+  width: 90px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.input-group input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.habit-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 24px 0;
+}
+
+.habit-btn {
+  width: 110px;
+  height: 110px;
+  border-radius: 20px;
+  border: 2px solid #aab5c8;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.habit-btn:hover {
+  background-color: #f0f3f8;
+}
+
+.habit-btn.active {
+  box-shadow: 0 0 0 6px #B4C7E7;
+}
+/* PROFILE PAGE END */
+
+/* HELP PAGE START */
+.help-section {
+  padding: 24px;
+  border: 2px solid black;
+  border-radius: 30px;
+  margin-bottom: 30px;
+}
+
+.help-section h2 {
+  margin-top: 0;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* FAQ Styles */
+details {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+summary {
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  list-style-type: none; /* Helps standardise the arrow marker */
+}
+
+summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 10px;
+  transition: transform 0.3s ease;
+  font-size: 0.8em;
+}
+
+details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+details p {
+  margin: 15px 0 0 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Form Styles */
+.help-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.help-form label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.help-form input,
+.help-form textarea {
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* Button */
+.btn {
+  background:white;
+  padding: 12px 20px;
+  border: 1px solid black;
+  border-radius: 100px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* HELP PAGE END */

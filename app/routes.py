@@ -554,7 +554,7 @@ def update_habits():
     flash("Preferences updated!", "success")
 
 
-    return redirect(url_for("main.dashboard"))
+    return redirect(url_for("main.profile"))
 
 @main.route("/reset")
 @login_required
@@ -646,17 +646,17 @@ def change_password():
         pepper = current_app.config["PASSWORD_PEPPER"]
 
         # Verify current password against stored hash
-        if not verify_password(raw_current_password, user.password, pepper):
+        if not verify_password(raw_current_password, user.password_hash, pepper):
             flash("Current password is incorrect.", "error")
             return render_template("change_password.html")
 
         # Prevent reusing same password
-        if verify_password(new_password, user.password, pepper):
+        if verify_password(new_password, user.password_hash, pepper):
             flash("New password must be different from your current password.", "error")
             return render_template("change_password.html")
 
         # Save new hash
-        user.password = hash_password(new_password, pepper)
+        user.password_hash = hash_password(new_password, pepper)
         db.session.commit()
 
         security_logger.info(
