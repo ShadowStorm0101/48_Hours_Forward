@@ -86,6 +86,32 @@ def reset_habit(habit):
     return redirect(url_for("main.dashboard"))
 
 
+@main.route("/reset-habit/<habit>", methods=["POST"])
+@login_required
+def reset_habit(habit):
+    user = _current_user()
+
+    if not user:
+        flash("Please log in first.", "error")
+        return redirect(url_for("main.login"))
+
+    if habit == "alcohol":
+        user.alcohol_streak_start = datetime.utcnow()
+    elif habit == "nicotine":
+        user.nicotine_streak_start = datetime.utcnow()
+    elif habit == "narcotics":
+        user.narcotics_streak_start = datetime.utcnow()
+    else:
+        # this should never logically occur - z
+        flash("Invalid habit.", "error")
+        return redirect(url_for("main.dashboard"))
+
+    db.session.commit()
+
+    flash(f"{habit.capitalize()} streak reset.", "success")
+    return redirect(url_for("main.dashboard"))
+
+
 
 @main.route("/")
 def home():
