@@ -1,4 +1,5 @@
 import logging
+import random
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -8,7 +9,7 @@ from sqlalchemy.orm import joinedload
 
 from . import db
 
-from .models import User, LocationService, Resource
+from .models import User, LocationService, Resource, JournalEntry
 from .utils.email_notifications import send_checkin_reminder_email
 
 from .models import User
@@ -16,7 +17,7 @@ from .models import User
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
-
+from .utils.email import send_verification_email
 
 main = Blueprint("main", __name__)
 
@@ -35,7 +36,12 @@ def _current_user() -> User | None:
     uid = session.get("user_id")
     if not uid:
         return None
-    return User.query.get(uid)
+
+    user = db.session.get(User, uid)
+    if not user:
+        session.clear()
+
+    return user
 
 
 
@@ -92,44 +98,125 @@ def home():
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        raw_public_username = request.form.get("public_username", "")
+        raw_username = request.form.get("public_username", "")
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
 
-        ip = request.remote_addr or "unknown"
-        ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-
         try:
-            public_username = validate_username(raw_public_username)
+            username = validate_username(raw_username)
             email = validate_email(raw_email)
             password = validate_password(raw_password, username=email)
         except ValueError as e:
             flash(str(e), "error")
-            security_logger.warning("REGISTER FAILED at %s ip=%s email=%r reason=%s", ts, ip, raw_email, str(e))
             return render_template("register.html")
 
-        # uniqueness checks
+        # uniqueness checks BEFORE proceeding
         if User.query.filter_by(email=email).first():
-            flash("Email already registered. Please log in.", "error")
+            flash("Email already exists", "error")
             return redirect(url_for("main.login"))
 
-        if User.query.filter_by(username=public_username).first():
-            flash("That username is taken. Choose another.", "error")
+        if User.query.filter_by(username=username).first():
+            flash("Username taken", "error")
             return render_template("register.html")
 
+        # generate verification code
+        code = str(random.randint(100000, 999999))
 
+        # store TEMP data in session (NOT DB)
+        session["pending_user"] = {
+            "username": username,
+            "email": email,
+            "password": password  # plain for now, hash later
+        }
+        session["verification_code"] = code
+
+        send_verification_email(email, code)
+
+        flash("Verification code sent!", "success")
+        return redirect(url_for("main.verify"))
+
+    return render_template("register.html")
+
+@main.route("/verify", methods=["GET", "POST"])
+def verify():
+    pending = session.get("pending_user")
+    code_expected = session.get("verification_code")
+
+    if not pending or not code_expected:
+        flash("Session expired. Register again.", "error")
+        return redirect(url_for("main.register"))
+
+    if request.method == "POST":
+        code_input = request.form.get("code")
+
+        if code_input != code_expected:
+            flash("Invalid code", "error")
+            return render_template("verify.html")
+
+        # ✅ NOW create user
         pepper = current_app.config["PASSWORD_PEPPER"]
-        password_hash = hash_password(password, pepper)
+        password_hash = hash_password(pending["password"], pepper)
 
-        user = User(username=public_username, email=email, password_hash=password_hash, role="user", alcohol_streak_start=None, narcotics_streak_start=None, nicotine_streak_start=None)
+        user = User(
+            username=pending["username"],
+            email=pending["email"],
+            password_hash=password_hash,
+            is_verified=True
+        )
+
         db.session.add(user)
         db.session.commit()
 
-        flash("Registration successful. Please log in.", "success")
-        security_logger.info("REGISTER SUCCESS at %s ip=%s user_id=%s username=%r", ts, ip, user.id, user.username)
+        # cleanup session
+        session.pop("pending_user", None)
+        session.pop("verification_code", None)
+
+        session["onboarding_user"] = user.id
+
+        flash("Email verified!", "success")
+        return redirect(url_for("main.onboarding"))
+
+    return render_template("verify.html")
+
+
+@main.route("/onboarding", methods=["GET", "POST"])
+def onboarding():
+    user_id= session.get("onboarding_user")
+
+    if not user_id:
+        flash("Session expired. please register again.", "error")
+        return redirect(url_for("main.register"))
+
+    user = db.session.get(User,user_id)
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("main.register"))
+
+    if request.method == "POST":
+        gender = request.form.get("gender")
+        age = request.form.get("age")
+        addictions = request.form.getlist("addictions")
+
+        user.gender = gender
+        user.age = int(age) if age else None
+
+        if request.form.get("alcohol"):
+            user.alcohol_streak_start = datetime.utcnow()
+        if request.form.get("nicotine"):
+            user.nicotine_streak_start = datetime.utcnow()
+        if request.form.get("narcotics"):
+            user.narcotics_streak_start = datetime.utcnow()
+
+        db.session.commit()
+
+        session.pop("onboarding_user", None)
+
+        flash("Profile setup complete!", "success")
         return redirect(url_for("main.login"))
 
-    return render_template("register.html")
+    return render_template("onboarding.html")
+
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
@@ -221,7 +308,102 @@ def logout():
 @main.route("/journal")
 @login_required
 def journal():
-    return render_template("journal.html")
+    user = _current_user()
+    if not user:
+        flash("Please log in first.", "error")
+        return redirect(url_for("main.login"))
+
+    selected_entry_id = request.args.get("entry_id", type=int)
+
+    entries = (
+        JournalEntry.query
+        .filter_by(user_id=user.id)
+        .order_by(JournalEntry.updated_at.desc())
+        .all())
+
+    favourites = [entry for entry in entries if entry.is_favourite]
+    recent = [entry for entry in entries if not entry.is_favourite]
+
+    active_entry = None
+    if entries:
+        if selected_entry_id is not None:
+            active_entry = next((entry for entry in entries if entry.id == selected_entry_id), None)
+        if active_entry is None:
+            active_entry = entries[0]
+
+    return render_template("journal.html",
+        favourites=favourites,
+        recent=recent,
+        active_entry=active_entry)
+
+@main.route("/journal/new", methods=["POST"])
+@login_required
+def create_journal_entry():
+    user = _current_user()
+    if not user:
+        flash("Please log in first.", "error")
+        return redirect(url_for("main.login"))
+
+    entry = JournalEntry(
+        title="New Entry",
+        content="",
+        user_id=user.id,
+        is_favourite=False)
+    db.session.add(entry)
+    db.session.commit()
+
+    return redirect(url_for("main.journal", entry_id=entry.id))
+
+@main.route("/journal/<int:entry_id>/save", methods=["POST"])
+@login_required
+def save_journal_entry(entry_id):
+    user = _current_user()
+    if not user:
+        flash("Please log in first.", "error")
+        return redirect(url_for("main.login"))
+
+    entry = JournalEntry.query.filter_by(id=entry_id, user_id=user.id).first_or_404()
+
+    raw_title = request.form.get("title", "").strip()
+    raw_content = request.form.get("content", "").strip()
+
+    entry.title = raw_title[:120] if raw_title else "Untitled"
+    entry.content = sanitize_html(raw_content)
+
+    db.session.commit()
+    flash("Journal entry saved.", "success")
+    return redirect(url_for("main.journal", entry_id=entry.id))
+
+
+@main.route("/journal/<int:entry_id>/toggle-favourite", methods=["POST"])
+@login_required
+def toggle_journal_favourite(entry_id):
+    user = _current_user()
+    if not user:
+        flash("Please log in first.", "error")
+        return redirect(url_for("main.login"))
+
+    entry = JournalEntry.query.filter_by(id=entry_id, user_id=user.id).first_or_404()
+    entry.is_favourite = not entry.is_favourite
+    db.session.commit()
+
+    return redirect(url_for("main.journal", entry_id=entry.id))
+
+@main.route("/journal/<int:entry_id>/delete", methods=["POST"])
+@login_required
+def delete_journal_entry(entry_id):
+    user = _current_user()
+    if not user:
+        flash("Please log in first.", "error")
+        return redirect(url_for("main.login"))
+
+    entry = JournalEntry.query.filter_by(id=entry_id, user_id=user.id).first_or_404()
+
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash("Journal entry deleted.", "success")
+    return redirect(url_for("main.journal"))
 
 @main.route("/resources")
 @login_required

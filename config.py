@@ -7,13 +7,9 @@ class Config:
     # Flask
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
-    MAPS_API_KEY = os.environ.get(
-        "MAPS_API_KEY",
-        "AIzaSyAarCR8Cbq1519ANDXB0c4Czw7-LcEFCe8")
-
     # Database (store in instance/app.db by default)
     DB_PATH = os.environ.get("DB_PATH", os.path.join(basedir, "instance", "app.db"))
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")   # why sqlite here?
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Session cookie security
@@ -39,7 +35,12 @@ class Config:
         "BIO_ENCRYPTION_KEY",
         "dOFoB-xRbITmNdBjxXTgCcQdpK65q_owWlLVSL8oeio=")
 
-
-
     DEBUG = True
     TESTING = False
+
+    EMAIL_USER = os.environ.get("EMAIL_USER")
+    EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+
+    MAPS_API_KEY = os.environ.get(
+        "MAPS_API_KEY",
+        "AIzaSyAarCR8Cbq1519ANDXB0c4Czw7-LcEFCe8")

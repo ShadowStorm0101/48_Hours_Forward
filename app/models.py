@@ -1,10 +1,14 @@
+
 from __future__ import annotations
 import csv
 import os
+from typing import List, Optional
+
 from flask import current_app
 from . import db
-from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean, true
+from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time, Text, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, time
 
 
@@ -23,14 +27,36 @@ class User(db.Model):
     alcohol_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     narcotics_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     nicotine_streak_start: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    # addiction_type: Mapped[str] = mapped_column(String(16), nullable=False) # We seem to use booleans, can revisit -zak
     last_login_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     last_reminder_sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     reminder_email_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    gender: Mapped[Optional[bool]] = mapped_column(String(20), default=False)
+    age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    verification_code: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+    journal_entries: Mapped[List["JournalEntry"]] = relationship("JournalEntry", back_populates="user",
+                                                                 cascade="all, delete-orphan")
+
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
 
+class JournalEntry(db.Model):
+
+    __tablename__ = "journal_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(120), nullable=False, default="New Entry")
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    is_favourite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="journal_entries")
 
 class LocationService(db.Model):
     __tablename__ = "location_services"
@@ -44,8 +70,8 @@ class LocationService(db.Model):
     time: Mapped[time] = mapped_column(Time, index=True, nullable=False)
 
     is_alcohol: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
     is_nicotine: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_narcotics: Mapped[bool] = mapped_column(Boolean, default=False)
 
 class Resource(db.Model):
     __tablename__ = "resources"
@@ -62,52 +88,49 @@ class Resource(db.Model):
         return f"Resource(id={self.id}, name={self.name})"
 
 def seed_data():
-    """Populate sample users and posts (called from reset_db.py / run.py)."""
     from flask import current_app
     from .utils.encryption import hash_password
 
     pepper = current_app.config["PASSWORD_PEPPER"]
-
     # up until last session commit
-    # if User.query.count() == 0:
-    admin = User(
-        username="admin",
-        email="admin@example.com",
-        password_hash=hash_password("Admin123!AAA", pepper),
-        role="admin",
-        alcohol_streak_start=None,
-        narcotics_streak_start=None,
-        nicotine_streak_start=None
-    )
-    moderator = User(
-        username="mod1",
-        email="mod1@example.com",
-        password_hash=hash_password("Mod123!AAAA1", pepper),
-        role="moderator",
-        alcohol_streak_start=None,
-        narcotics_streak_start=None,
-        nicotine_streak_start=None
-    )
-    user1 = User(
-        username="user1",
-        email="user1@example.com",
-        password_hash=hash_password("User123!AAAA1", pepper),
-        role="user",
-        alcohol_streak_start=None,
-        narcotics_streak_start=None,
-        nicotine_streak_start=None
-    )
-    user2 = User(
-        username="user2",
-        email="user2@example.com",
-        password_hash=hash_password("User456!AAAA1", pepper),
-        role="user",
-        alcohol_streak_start=None,
-        narcotics_streak_start=None,
-        nicotine_streak_start=None
-    )
+    if User.query.count() == 0:
+        admin = User(
+            username="admin",
+            email="admin@example.com",
+            password_hash=hash_password("Admin123!AAA", pepper),
+            role="admin",
+            alcohol_streak_start=None,
+            narcotics_streak_start=None,
+            nicotine_streak_start=None
+        )
+        moderator = User(
+            username="mod1",
+            email="mod1@example.com",
+            password_hash=hash_password("Mod123!AAAA1", pepper),
+            role="moderator",
+            alcohol_streak_start=None,
+            narcotics_streak_start=None,
+            nicotine_streak_start=None
+        )
+        user1 = User(
+            username="user1",
+            email="user1@example.com",
+            password_hash=hash_password("User123!AAAA1", pepper),
+            role="user",
+            alcohol_streak_start=None,
+            narcotics_streak_start=None,
+            nicotine_streak_start=None
+        )
+        user2 = User(
+            username="user2",
+            email="user2@example.com",
+            password_hash=hash_password("User456!AAAA1", pepper),
+            role="user",
+            alcohol_streak_start=None,
+            narcotics_streak_start=None,
+            nicotine_streak_start=None
+        )
 
-    db.session.add_all([admin, moderator, user1, user2])
     db.session.commit()
     seed_resources()
 
