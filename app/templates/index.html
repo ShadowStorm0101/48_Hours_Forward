@@ -1,11 +1,13 @@
-{% block title %}Home{% endblock %}
-
 {% block head %}
 <link rel="stylesheet" href="../static/loginpages.css">
 {% endblock %}
 
 {% block content %}
-  <img src="{{ url_for('static', filename='images/logo.png') }}" id="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" id="index-logo">
+
+<div class = 'main-content'>
   <a href="{{ url_for('main.login') }}" class="button">Login</a>
   <a href="{{ url_for('main.register') }}" class="button">Sign Up</a>
+</div>
+
 {% endblock %}

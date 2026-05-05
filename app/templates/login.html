@@ -1,56 +1,53 @@
-{% block content %}
+{% block head %}
+<link rel="stylesheet" href="../static/loginpages.css">
+{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Log In</title>
-    <link rel="stylesheet" href="../static/loginpages.css">
-</head>
+{% block content %}
 
 <!-- Flash messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul>
       {% for category, message in messages %}
-        <li style="color: {{ 'red' if category == 'error' else 'green' }};">
-          {{ message }}
-        </li>
+        <li style="color: {{ 'red' if category == 'error' else 'green' }};">{{ message }}</li>
       {% endfor %}
     </ul>
   {% endif %}
 {% endwith %}
 
-<img src="static/images/logo.png" id="logo">
-<form method="POST" novalidate>
+<img src="static/images/logo.png" class="logo">
+
+<div class="main-content">
+  <form method="POST" novalidate style="width: 100%; display: flex; flex-direction: column; gap: 1.25rem;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <p class="form-row">
-        <label for="email">Email:</label>
-        <input type="text" name="email" id="email" autocomplete="email" required>
-        {% if errors and errors.get('email') %}
-          {% for error in errors.get('email') %}
-            <span style="color: red;">{{ error }}</span>
-          {% endfor %}
-        {% endif %}
-    </p>
+    <div class="form-row">
+      <label for="email">Email:</label>
+      <input type="text" name="email" id="email" autocomplete="email" required placeholder="example@email.com">
+      {% if errors and errors.get('email') %}
+        {% for error in errors.get('email') %}
+          <span style="color: red; font-size: 13px;">{{ error }}</span>
+        {% endfor %}
+      {% endif %}
+    </div>
 
-    <p class="form-row">
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" autocomplete="current-password" required>
-        {% if errors and errors.get('password') %}
-          {% for error in errors.get('password') %}
-            <span style="color: red;">{{ error }}</span>
-          {% endfor %}
-        {% endif %}
-    </p>
+    <div class="form-row">
+      <label for="password">Password:</label>
+      <input type="password" name="password" id="password" autocomplete="current-password" required>
+      {% if errors and errors.get('password') %}
+        {% for error in errors.get('password') %}
+          <span style="color: red; font-size: 13px;">{{ error }}</span>
+        {% endfor %}
+      {% endif %}
+    </div>
 
-    <p>
-        <input type="submit" value="Login" class="button">
-    </p>
-</form>
+    <input type="submit" value="Log In" class="button">
+  </form>
 
-<p>
-  Don’t have an account?
-  <a href="{{ url_for('main.register') }}" class="button">Register</a>
-</p>
+  <p style="font-size: 14px; color: #666; margin: 0;">
+    Don't have an account?
+    <a href="{{ url_for('main.register') }}" style="color: #111;">Register</a>
+  </p>
+</div>
 
 {% endblock %}
