@@ -65,15 +65,14 @@
   padding-top: 10px;
 }
 
-/* flame look */
 .flame-svg {
   width: 28px;
   height: 28px;
   animation: flame-bounce 1s infinite;
-  filter: none;
+  transition: fill 0.5s ease;
 }
 
 @keyframes flame-bounce {
   0%,100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50%      { transform: scale(1.1); }
 }

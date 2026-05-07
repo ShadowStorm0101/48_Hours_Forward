@@ -198,12 +198,16 @@
 
     // flame system
     const flameLevels = [
-        { min: 90, class: "flame-black", color: "black" },
-        { min: 30, class: "flame-purple", color: "purple" },
-        { min: 7,  class: "flame-red", color: "red" },
-        { min: 1,  class: "flame-orange", color: "orange" },
-        { min: 0,  class: "flame-yellow", color: "yellow" }
-    ];
+    { min: 1000, color: "#000000" },  // black
+    { min: 365,  color: "#800080" },  // purple
+    { min: 100,  color: "#ff69b4" },  // pink
+    { min: 50,   color: "#00008b" },  // dark blue
+    { min: 30,   color: "#64c8c8" },  // light blue
+    { min: 14,   color: "#ff1212" },  // red
+    { min: 7,    color: "#ff6600" },  // dark orange
+    { min: 1,    color: "#ffa500" },  // light orange
+    { min: 0,    color: "#ffff00" },  // yellow
+];
 
     function applyFlameEffects() {
         document.querySelectorAll(".habit-card").forEach(card => {
