@@ -9,6 +9,8 @@ from . import db
 from sqlalchemy import Integer, String, ForeignKey, Enum, Text, DateTime, Boolean, true
 from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, time, timedelta
+
 from datetime import datetime
 from flask import current_app
 from .utils.encryption import hash_password
@@ -49,53 +51,18 @@ class User(db.Model):
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
 
-
 class JournalEntry(db.Model):
     __tablename__ = "journal_entries"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(120), nullable=False, default="New Entry")
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    is_favourite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    title: Mapped[str] = mapped_column(
-        String(120),
-        nullable=False,
-        default="New Entry"
-    )
-
-    content: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-        default=""
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
-        nullable=False
-    )
-
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-        nullable=False
-    )
-
-    is_favourite: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False
-    )
-
-    user_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
-    user: Mapped["User"] = relationship(
-        "User",
-        back_populates="journal_entries"
-    )
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="journal_entries")
 
 class LocationService(db.Model):
     __tablename__ = "location_services"
@@ -135,15 +102,14 @@ def seed_data():
             email="admin@example.com",
             password_hash=hash_password("Admin123!AAA", pepper),
             role="admin",
-            is_verified=True,
-            gender="male",
-            age=30
+            alcohol_streak_start=datetime.utcnow() - timedelta(days=120),
+            narcotics_streak_start=datetime.utcnow() - timedelta(days=60),
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=13)
         )
-
         moderator = User(
-            username="moderator",
-            email="moderator@example.com",
-            password_hash=hash_password("Moderator123!AAA", pepper),
+            username="mod1",
+            email="mod1@example.com",
+            password_hash=hash_password("Mod123!AAAA1", pepper),
             role="moderator",
             is_verified=True,
             gender="female",
@@ -152,7 +118,6 @@ def seed_data():
             narcotics_streak_start=None,
             nicotine_streak_start=None
         )
-
         user1 = User(
             username="user1",
             email="user1@example.com",
@@ -167,17 +132,13 @@ def seed_data():
             email="user2@example.com",
             password_hash=hash_password("User456!AAAA1", pepper),
             role="user",
-            is_verified=True,
-            gender="other",
-            age=17,
             alcohol_streak_start=None,
             narcotics_streak_start=None,
             nicotine_streak_start=None
         )
 
-        db.session.add_all([admin, moderator, user1, user2])
-        db.session.commit()
-        seed_resources()
+    db.session.commit()
+    seed_resources()
 
 
 def seed_location_services_from_csv():
