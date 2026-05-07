@@ -2,12 +2,27 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+
 <h2>Welcome, {{ user.username }}</h2>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul>
+      {% for category, message in messages %}
+        <li style="color: {{ 'red' if category == 'error' else 'green' }};">
+          {{ message }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
 {% if role == "moderator" and stats %}
+
 <h3>Moderator Analytics</h3>
 
 <div class="pie-row">
+
     <div class="pie-card">
         <canvas id="genderChart"></canvas>
         <div class="pie-label">Gender</div>
@@ -22,6 +37,7 @@
         <canvas id="addictionChart"></canvas>
         <div class="pie-label">Substance</div>
     </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,7 +45,6 @@
 <script>
 const stats = {{ stats | tojson }};
 
-// Gender Pie
 new Chart(document.getElementById("genderChart"), {
     type: "pie",
     data: {
@@ -41,17 +56,9 @@ new Chart(document.getElementById("genderChart"), {
                 stats.gender.other || 0
             ]
         }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        }
     }
 });
 
-// Age Pie
 new Chart(document.getElementById("ageChart"), {
     type: "pie",
     data: {
@@ -64,17 +71,9 @@ new Chart(document.getElementById("ageChart"), {
                 stats.age_groups["40_plus"] || 0
             ]
         }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        }
     }
 });
 
-// Addictions Pie (kept as pie for consistent design)
 new Chart(document.getElementById("addictionChart"), {
     type: "pie",
     data: {
@@ -86,178 +85,221 @@ new Chart(document.getElementById("addictionChart"), {
                 stats.addictions.narcotics || 0
             ]
         }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        }
     }
 });
 </script>
 
-<style>
-.pie-row {
-    display: flex;
-    justify-content: center;
-    gap: 25px;
-    margin-top: 20px;
-}
+{% endif %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul>
-      {% for category, message in messages %}
-        <li style="color: {{ 'red' if category == 'error' else 'green' }};">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-
-
-  <div class="dashboard-box">
+<div class="dashboard-box">
 
     <div class="habit-card-container">
 
-      {% if user.alcohol_streak_start is not none %}
+        {% if user.alcohol_streak_start is not none %}
         <div class="habit-card">
-          <div class="habit-title">Alcohol</div>
+            <div class="habit-title">Alcohol</div>
 
-          <div class="streak-box">
-            <span
-              class="live-streak"
-              data-start="{{ user.alcohol_streak_start.isoformat() }}Z"
-            ></span>
-          </div>
+            <div class="streak-box">
+                🔥
+                <span class="live-streak"
+                      data-start="{{ user.alcohol_streak_start.isoformat() }}Z"></span>
+            </div>
 
-          <div class="milestone-box">
-            <p>{{ alcohol_milestone_message }}</p>
-          </div>
+            <div class="milestone-box">
+                <p>{{ alcohol_milestone_message }}</p>
+            </div>
 
-          <form method="POST" action="{{ url_for('main.reset_habit', habit='alcohol') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <form method="POST"
+                  action="{{ url_for('main.reset_habit', habit='alcohol') }}">
 
-            <button
-              class="reset-button"
-              type="submit"
-              onclick="return confirm('Reset Alcohol streak?')"
-            >
-              Reset
-            </button>
-          </form>
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <button class="reset-button"
+                        type="submit">
+                    Reset
+                </button>
+            </form>
         </div>
-      {% endif %}
+        {% endif %}
 
-      {% if user.nicotine_streak_start is not none %}
+        {% if user.nicotine_streak_start is not none %}
         <div class="habit-card">
-          <div class="habit-title">Nicotine</div>
+            <div class="habit-title">Nicotine</div>
 
-          <div class="streak-box">
-            <span
-              class="live-streak"
-              data-start="{{ user.nicotine_streak_start.isoformat() }}Z"
-            ></span>
-          </div>
+            <div class="streak-box">
+                🔥
+                <span class="live-streak"
+                      data-start="{{ user.nicotine_streak_start.isoformat() }}Z"></span>
+            </div>
 
-          <div class="milestone-box">
-            <p>{{ nicotine_milestone_message }}</p>
-          </div>
+            <div class="milestone-box">
+                <p>{{ nicotine_milestone_message }}</p>
+            </div>
 
-          <form method="POST" action="{{ url_for('main.reset_habit', habit='nicotine') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <form method="POST"
+                  action="{{ url_for('main.reset_habit', habit='nicotine') }}">
 
-            <button
-              class="reset-button"
-              type="submit"
-              onclick="return confirm('Reset Nicotine streak?')"
-            >
-              Reset
-            </button>
-          </form>
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <button class="reset-button"
+                        type="submit">
+                    Reset
+                </button>
+            </form>
         </div>
-      {% endif %}
+        {% endif %}
 
-      {% if user.narcotics_streak_start is not none %}
+        {% if user.narcotics_streak_start is not none %}
         <div class="habit-card">
-          <div class="habit-title">Narcotics</div>
+            <div class="habit-title">Narcotics</div>
 
-          <div class="streak-box">
-            <span
-              class="live-streak"
-              data-start="{{ user.narcotics_streak_start.isoformat() }}Z"
-            ></span>
-          </div>
+            <div class="streak-box">
+                🔥
+                <span class="live-streak"
+                      data-start="{{ user.narcotics_streak_start.isoformat() }}Z"></span>
+            </div>
 
-          <div class="milestone-box">
-            <p>{{ narcotics_milestone_message }}</p>
-          </div>
+            <div class="milestone-box">
+                <p>{{ narcotics_milestone_message }}</p>
+            </div>
 
-          <form method="POST" action="{{ url_for('main.reset_habit', habit='narcotics') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <form method="POST"
+                  action="{{ url_for('main.reset_habit', habit='narcotics') }}">
 
-            <button
-              class="reset-button"
-              type="submit"
-              onclick="return confirm('Reset Narcotics streak?')"
-            >
-              Reset
-            </button>
-          </form>
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <button class="reset-button"
+                        type="submit">
+                    Reset
+                </button>
+            </form>
         </div>
-      {% endif %}
+        {% endif %}
 
     </div>
 
-  </div>
+</div>
 
-  <script>
-    function formatDelta(milliseconds) {
-      let totalSeconds = Math.floor(milliseconds / 1000);
+<style>
 
-      let days = Math.floor(totalSeconds / 86400);
-      totalSeconds %= 86400;
+.pie-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
 
-      let hours = Math.floor(totalSeconds / 3600);
-      totalSeconds %= 3600;
+.pie-card {
+    width: 260px;
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 
-      let minutes = Math.floor(totalSeconds / 60);
-      let seconds = totalSeconds % 60;
+.pie-card canvas {
+    width: 100% !important;
+    height: 240px !important;
+}
 
-    if (days > 30) {
-     return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
-    }
+.pie-label {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 20px;
+}
 
-    if (days > 0) {
-      return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
-    }
+.habit-card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+    margin-top: 30px;
+}
 
-    if (hours > 0) {
-      return `${hours} hours\n${minutes} minutes\n${seconds} seconds`;
-    }
+.habit-card {
+    width: 300px;
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 
-    if (minutes > 0) {
-      return `${minutes} minutes\n${seconds} seconds`;
-    }
+.habit-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
 
-    return `${seconds} seconds`;
-    }
+.streak-box {
+    font-size: 26px;
+    margin-bottom: 20px;
+    white-space: pre-line;
+}
 
-    function updateStreaks() {
-      const streakElements = document.querySelectorAll(".live-streak");
+.milestone-box {
+    margin-bottom: 20px;
+}
 
-      streakElements.forEach(function(element) {
-        const startTime = new Date(element.dataset.start);
+.reset-button {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+</style>
+
+<script>
+
+function formatDelta(milliseconds) {
+
+    let totalSeconds = Math.floor(milliseconds / 1000);
+
+    let days = Math.floor(totalSeconds / 86400);
+    totalSeconds %= 86400;
+
+    let hours = Math.floor(totalSeconds / 3600);
+    totalSeconds %= 3600;
+
+    let minutes = Math.floor(totalSeconds / 60);
+    let seconds = totalSeconds % 60;
+
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
+function updateStreaks() {
+
+    const streakElements =
+        document.querySelectorAll(".live-streak");
+
+    streakElements.forEach(function(element) {
+
+        const startTime =
+            new Date(element.dataset.start);
+
         const now = new Date();
+
         const difference = now - startTime;
 
-        element.textContent = formatDelta(difference);
-      });
-    }
+        element.textContent =
+            formatDelta(difference);
+    });
+}
 
-    updateStreaks();
-    setInterval(updateStreaks, 1000);
-  </script>
-{% endif %}
+updateStreaks();
+
+setInterval(updateStreaks, 1000);
+
+</script>
 
 {% endblock %}

@@ -5,7 +5,7 @@ from functools import wraps
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
 from sqlalchemy.orm import joinedload
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from . import db
 from .models import User, LocationService, Resource, JournalEntry
@@ -256,6 +256,7 @@ def login():
 @login_required
 def dashboard():
     user = _current_user()
+
     if not user:
         flash("Please log in first.", "error")
         return redirect(url_for("main.login"))
@@ -265,7 +266,6 @@ def dashboard():
         alcohol_delta = datetime.utcnow() - user.alcohol_streak_start
         alcohol_milestone_message = distance_milestone(alcohol_delta)
     else:
-        current_alcohol_streak = None
         alcohol_milestone_message = None
 
     # NICOTINE
@@ -273,7 +273,6 @@ def dashboard():
         nicotine_delta = datetime.utcnow() - user.nicotine_streak_start
         nicotine_milestone_message = distance_milestone(nicotine_delta)
     else:
-        current_nicotine_streak = None
         nicotine_milestone_message = None
 
     # NARCOTICS
@@ -281,20 +280,73 @@ def dashboard():
         narcotics_delta = datetime.utcnow() - user.narcotics_streak_start
         narcotics_milestone_message = distance_milestone(narcotics_delta)
     else:
-        current_narcotics_streak = None
         narcotics_milestone_message = None
 
-    edit = request.args.get("edit")
+    stats = None
+
+    if user.role == "moderator":
+        users = User.query.all()
+
+        male = female = other = 0
+        alcohol = smoking = narcotics = 0
+
+        age_groups = {
+            "under_18": 0,
+            "18_25": 0,
+            "26_40": 0,
+            "40_plus": 0
+        }
+
+        for u in users:
+            if u.gender == "male":
+                male += 1
+            elif u.gender == "female":
+                female += 1
+            elif u.gender == "other":
+                other += 1
+
+            if u.alcohol_streak_start is not None:
+                alcohol += 1
+
+            if u.nicotine_streak_start is not None:
+                smoking += 1
+
+            if u.narcotics_streak_start is not None:
+                narcotics += 1
+
+            if u.age is not None:
+                if u.age < 18:
+                    age_groups["under_18"] += 1
+                elif 18 <= u.age <= 25:
+                    age_groups["18_25"] += 1
+                elif 26 <= u.age <= 40:
+                    age_groups["26_40"] += 1
+                else:
+                    age_groups["40_plus"] += 1
+
+        stats = {
+            "gender": {
+                "male": male,
+                "female": female,
+                "other": other
+            },
+            "addictions": {
+                "alcohol": alcohol,
+                "smoking": smoking,
+                "narcotics": narcotics
+            },
+            "age_groups": age_groups
+        }
 
     return render_template(
         "dashboard.html",
         user=user,
+        role=user.role,
+        stats=stats,
         alcohol_milestone_message=alcohol_milestone_message,
         nicotine_milestone_message=nicotine_milestone_message,
-        narcotics_milestone_message=narcotics_milestone_message,
-        edit=edit
+        narcotics_milestone_message=narcotics_milestone_message
     )
-
 
 
 @main.route("/logout")
@@ -499,11 +551,13 @@ def map():
             elif u.gender == "other":
                 other += 1
 
-            if u.alcohol:
+            if u.alcohol_streak_start is not None:
                 alcohol += 1
-            if u.smoking:
+
+            if u.nicotine_streak_start is not None:
                 smoking += 1
-            if u.narcotics:
+
+            if u.narcotics_streak_start is not None:
                 narcotics += 1
 
             if u.age is not None:
@@ -531,13 +585,6 @@ def map():
             "age_groups": age_groups
         }
 
-    return render_template(
-        "dashboard.html",
-        user=user,
-        posts=posts,
-        role=user.role,
-        stats=stats
-    )
     DAY_MAP = {
         0: "Monday",
         1: "Tuesday",
