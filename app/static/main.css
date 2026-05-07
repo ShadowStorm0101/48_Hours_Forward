@@ -325,6 +325,24 @@
 .reset-button:hover {
   background-color: #eef2f7;
 }
+
+.flame-icon {
+  margin-top: auto;
+  padding-top: 16px;
+  text-align: center;
+}
+
+.flame-svg {
+  width: 48px;
+  height: 48px;
+  animation: flame-bounce 1s infinite;
+  transition: fill 0.5s ease;
+}
+
+@keyframes flame-bounce {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.1); }
+}
 /*DASHBOARD END*/
 
 /*PROFILE START*/

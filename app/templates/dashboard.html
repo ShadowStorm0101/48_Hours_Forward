@@ -96,7 +96,7 @@ new Chart(document.getElementById("addictionChart"), {
     <div class="habit-card-container">
 
         {% if user.alcohol_streak_start is not none %}
-        <div class="habit-card">
+        <div class="habit-card" data-start="{{ user.alcohol_streak_start.isoformat() }}Z">
             <div class="habit-title">Alcohol</div>
 
             <div class="streak-box">
@@ -120,11 +120,18 @@ new Chart(document.getElementById("addictionChart"), {
                     Reset
                 </button>
             </form>
+
+            <div class="flame-icon">
+                <svg viewBox="0 0 24 24" class="flame-svg">
+                    <path d="M12 2C10 6 6 9 6 14a6 6 0 0012 0c0-4-4-7-6-12z"/>
+                </svg>
+            </div>
+
         </div>
         {% endif %}
 
         {% if user.nicotine_streak_start is not none %}
-        <div class="habit-card">
+        <div class="habit-card" data-start="{{ user.nicotine_streak_start.isoformat() }}Z">
             <div class="habit-title">Nicotine</div>
 
             <div class="streak-box">
@@ -148,11 +155,18 @@ new Chart(document.getElementById("addictionChart"), {
                     Reset
                 </button>
             </form>
+
+            <div class="flame-icon">
+                <svg viewBox="0 0 24 24" class="flame-svg">
+                    <path d="M12 2C10 6 6 9 6 14a6 6 0 0012 0c0-4-4-7-6-12z"/>
+                </svg>
+            </div>
+
         </div>
         {% endif %}
 
         {% if user.narcotics_streak_start is not none %}
-        <div class="habit-card">
+        <div class="habit-card" data-start="{{ user.narcotics_streak_start.isoformat() }}Z">
             <div class="habit-title">Narcotics</div>
 
             <div class="streak-box">
@@ -176,6 +190,13 @@ new Chart(document.getElementById("addictionChart"), {
                     Reset
                 </button>
             </form>
+
+            <div class="flame-icon">
+                <svg viewBox="0 0 24 24" class="flame-svg">
+                    <path d="M12 2C10 6 6 9 6 14a6 6 0 0012 0c0-4-4-7-6-12z"/>
+                </svg>
+            </div>
+
         </div>
         {% endif %}
 
@@ -184,61 +205,67 @@ new Chart(document.getElementById("addictionChart"), {
 </div>
 
 <script>
-
 function formatDelta(milliseconds) {
-      let totalSeconds = Math.floor(milliseconds / 1000);
+  let totalSeconds = Math.floor(milliseconds / 1000);
+  let days = Math.floor(totalSeconds / 86400);
+  totalSeconds %= 86400;
+  let hours = Math.floor(totalSeconds / 3600);
+  totalSeconds %= 3600;
+  let minutes = Math.floor(totalSeconds / 60);
+  let seconds = totalSeconds % 60;
 
-      let days = Math.floor(totalSeconds / 86400);
-      totalSeconds %= 86400;
-
-      let hours = Math.floor(totalSeconds / 3600);
-      totalSeconds %= 3600;
-
-      let minutes = Math.floor(totalSeconds / 60);
-      let seconds = totalSeconds % 60;
-
-    if (days > 30) {
-     return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
-    }
-
-    if (days > 0) {
-      return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
-    }
-
-    if (hours > 0) {
-      return `${hours} hours\n${minutes} minutes\n${seconds} seconds`;
-    }
-
-    if (minutes > 0) {
-      return `${minutes} minutes\n${seconds} seconds`;
-    }
-
-    return `${seconds} seconds`;
-    }
+  if (days > 30) {
+    return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
+  }
+  if (days > 0) {
+    return `${days} days\n${hours} hours\n${minutes} minutes\n${seconds} seconds`;
+  }
+  if (hours > 0) {
+    return `${hours} hours\n${minutes} minutes\n${seconds} seconds`;
+  }
+  if (minutes > 0) {
+    return `${minutes} minutes\n${seconds} seconds`;
+  }
+  return `${seconds} seconds`;
+}
 
 function updateStreaks() {
+  document.querySelectorAll(".live-streak").forEach(function(element) {
+    const startTime = new Date(element.dataset.start);
+    const now = new Date();
+    element.textContent = formatDelta(now - startTime);
+  });
+}
 
-    const streakElements =
-        document.querySelectorAll(".live-streak");
+const flameLevels = [
+  { min: 1000, color: "#000000" },  // black
+  { min: 365,  color: "#800080" },  // purple
+  { min: 100,  color: "#ff69b4" },  // pink
+  { min: 50,   color: "#00008b" },  // dark blue
+  { min: 30,   color: "#add8e6" },  // light blue
+  { min: 14,   color: "#ff4444" },  // light red
+  { min: 7,    color: "#ff6600" },  // dark orange
+  { min: 1,    color: "#ffa500" },  // light orange
+  { min: 0,    color: "#ffff00" },  // yellow
+];
 
-    streakElements.forEach(function(element) {
-
-        const startTime =
-            new Date(element.dataset.start);
-
-        const now = new Date();
-
-        const difference = now - startTime;
-
-        element.textContent =
-            formatDelta(difference);
-    });
+function applyFlameEffects() {
+  document.querySelectorAll(".habit-card").forEach(card => {
+    const flame = card.querySelector(".flame-svg");
+    if (!flame) return;
+    const start = new Date(card.dataset.start);
+    const days = Math.floor((new Date() - start) / 86400000);
+    const level = flameLevels.find(f => days >= f.min);
+    if (level) flame.style.fill = level.color;
+  });
 }
 
 updateStreaks();
-
-setInterval(updateStreaks, 1000);
-
+applyFlameEffects();
+setInterval(() => {
+  updateStreaks();
+  applyFlameEffects();
+}, 1000);
 </script>
 
 {% endblock %}
