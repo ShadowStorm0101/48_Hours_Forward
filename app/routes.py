@@ -8,19 +8,15 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import joinedload
 
 from . import db
-
 from .models import User, LocationService, Resource, JournalEntry
 from .utils.email_notifications import send_checkin_reminder_email
-
 from .models import User
-
 from .utils.validators import validate_email, validate_password, validate_bio, validate_username
 from .utils.sanitize import sanitize_html
 from .utils.encryption import hash_password, verify_password, encrypt_bio
 from .utils.email import send_verification_email
 
 main = Blueprint("main", __name__)
-
 security_logger = logging.getLogger("security")
 
 def login_required(view_func):
@@ -269,7 +265,6 @@ def dashboard():
         alcohol_delta = datetime.utcnow() - user.alcohol_streak_start
         alcohol_milestone_message = distance_milestone(alcohol_delta)
     else:
-        current_alcohol_streak = None
         alcohol_milestone_message = None
 
     # NICOTINE
@@ -277,7 +272,6 @@ def dashboard():
         nicotine_delta = datetime.utcnow() - user.nicotine_streak_start
         nicotine_milestone_message = distance_milestone(nicotine_delta)
     else:
-        current_nicotine_streak = None
         nicotine_milestone_message = None
 
     # NARCOTICS
@@ -285,18 +279,72 @@ def dashboard():
         narcotics_delta = datetime.utcnow() - user.narcotics_streak_start
         narcotics_milestone_message = distance_milestone(narcotics_delta)
     else:
-        current_narcotics_streak = None
         narcotics_milestone_message = None
 
-    edit = request.args.get("edit")
+    stats = None
+
+    if user.role == "moderator":
+        users = User.query.all()
+
+        male = female = other = 0
+        alcohol = smoking = narcotics = 0
+
+        age_groups = {
+            "under_18": 0,
+            "18_25": 0,
+            "26_40": 0,
+            "40_plus": 0
+        }
+
+        for u in users:
+            if u.gender == "male":
+                male += 1
+            elif u.gender == "female":
+                female += 1
+            elif u.gender == "other":
+                other += 1
+
+            if u.alcohol_streak_start is not None:
+                alcohol += 1
+
+            if u.nicotine_streak_start is not None:
+                smoking += 1
+
+            if u.narcotics_streak_start is not None:
+                narcotics += 1
+
+            if u.age is not None:
+                if u.age < 18:
+                    age_groups["under_18"] += 1
+                elif 18 <= u.age <= 25:
+                    age_groups["18_25"] += 1
+                elif 26 <= u.age <= 40:
+                    age_groups["26_40"] += 1
+                else:
+                    age_groups["40_plus"] += 1
+
+        stats = {
+            "gender": {
+                "male": male,
+                "female": female,
+                "other": other
+            },
+            "addictions": {
+                "alcohol": alcohol,
+                "smoking": smoking,
+                "narcotics": narcotics
+            },
+            "age_groups": age_groups
+        }
 
     return render_template(
         "dashboard.html",
         user=user,
+        role=user.role,
+        stats=stats,
         alcohol_milestone_message=alcohol_milestone_message,
         nicotine_milestone_message=nicotine_milestone_message,
-        narcotics_milestone_message=narcotics_milestone_message,
-        edit=edit
+        narcotics_milestone_message=narcotics_milestone_message
     )
 
 
@@ -478,7 +526,64 @@ def map():
         .all()
     )
 
+    stats = None
 
+    if user.role == "moderator":
+        users = User.query.all()
+
+        total_users = len(users)
+
+        male = female = other = 0
+        alcohol = smoking = narcotics = 0
+
+        age_groups = {
+            "under_18": 0,
+            "18_25": 0,
+            "26_40": 0,
+            "40_plus": 0
+        }
+
+        for u in users:
+            if u.gender == "male":
+                male += 1
+            elif u.gender == "female":
+                female += 1
+            elif u.gender == "other":
+                other += 1
+
+            if u.alcohol_streak_start is not None:
+                alcohol += 1
+
+            if u.nicotine_streak_start is not None:
+                smoking += 1
+
+            if u.narcotics_streak_start is not None:
+                narcotics += 1
+
+            if u.age is not None:
+                if u.age < 18:
+                    age_groups["under_18"] += 1
+                elif 18 <= u.age <= 25:
+                    age_groups["18_25"] += 1
+                elif 26 <= u.age <= 40:
+                    age_groups["26_40"] += 1
+                else:
+                    age_groups["40_plus"] += 1
+
+        stats = {
+            "total_users": total_users,
+            "gender": {
+                "male": male,
+                "female": female,
+                "other": other
+            },
+            "addictions": {
+                "alcohol": alcohol,
+                "smoking": smoking,
+                "narcotics": narcotics
+            },
+            "age_groups": age_groups
+        }
 
     DAY_MAP = {
         0: "Monday",
@@ -609,7 +714,7 @@ def update_habits():
     flash("Preferences updated!", "success")
 
 
-    return redirect(url_for("main.dashboard"))
+    return redirect(url_for("main.profile"))
 
 @main.route("/reset")
 @login_required
@@ -666,7 +771,7 @@ def require_login():
 
 
 
-# SQL injection and invalid inputs. 
+# SQL injection and invalid inputs.
 @main.route("/change-password", methods=["GET", "POST"])
 def change_password():
     resp = require_login()
@@ -701,17 +806,17 @@ def change_password():
         pepper = current_app.config["PASSWORD_PEPPER"]
 
         # Verify current password against stored hash
-        if not verify_password(raw_current_password, user.password, pepper):
+        if not verify_password(raw_current_password, user.password_hash, pepper):
             flash("Current password is incorrect.", "error")
             return render_template("change_password.html")
 
         # Prevent reusing same password
-        if verify_password(new_password, user.password, pepper):
+        if verify_password(new_password, user.password_hash, pepper):
             flash("New password must be different from your current password.", "error")
             return render_template("change_password.html")
 
         # Save new hash
-        user.password = hash_password(new_password, pepper)
+        user.password_hash = hash_password(new_password, pepper)
         db.session.commit()
 
         security_logger.info(

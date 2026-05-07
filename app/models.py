@@ -11,6 +11,10 @@ from sqlalchemy import Integer, String, Float, Enum, DateTime, Boolean, Time, Te
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, time, timedelta
 
+from datetime import datetime
+from flask import current_app
+from .utils.encryption import hash_password
+from datetime import datetime, time
 
 
 class User(db.Model):
@@ -32,21 +36,22 @@ class User(db.Model):
     last_reminder_sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     reminder_email_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    gender: Mapped[Optional[bool]] = mapped_column(String(20), default=False)
+    gender: Mapped[Optional[str]] = mapped_column(String(20), default=False)
     age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     verification_code: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
-
-    journal_entries: Mapped[List["JournalEntry"]] = relationship("JournalEntry", back_populates="user",
-                                                                 cascade="all, delete-orphan")
+    journal_entries: Mapped[List["JournalEntry"]] = relationship(
+        "JournalEntry",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r}, email={self.email!r}, role={self.role!r})"
 
 class JournalEntry(db.Model):
-
     __tablename__ = "journal_entries"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -89,9 +94,6 @@ class Resource(db.Model):
         return f"Resource(id={self.id}, name={self.name})"
 
 def seed_data():
-    from flask import current_app
-    from .utils.encryption import hash_password
-
     pepper = current_app.config["PASSWORD_PEPPER"]
     # up until last session commit
     if User.query.count() == 0:
@@ -109,18 +111,21 @@ def seed_data():
             email="mod1@example.com",
             password_hash=hash_password("Mod123!AAAA1", pepper),
             role="moderator",
-            alcohol_streak_start=datetime.utcnow() - timedelta(days=14, hours=5),
+            is_verified=True,
+            gender="female",
+            age=22,
+            alcohol_streak_start=None,
             narcotics_streak_start=None,
-            nicotine_streak_start=datetime.utcnow() - timedelta(days=3, hours=2)
+            nicotine_streak_start=None
         )
         user1 = User(
             username="user1",
             email="user1@example.com",
             password_hash=hash_password("User123!AAAA1", pepper),
             role="user",
-            alcohol_streak_start=datetime.utcnow() - timedelta(hours=15, minutes=20),
+            alcohol_streak_start=None,
             narcotics_streak_start=None,
-            nicotine_streak_start=datetime.utcnow() - timedelta(days=1, hours=1)
+            nicotine_streak_start=None
         )
         user2 = User(
             username="user2",
@@ -128,11 +133,10 @@ def seed_data():
             password_hash=hash_password("User456!AAAA1", pepper),
             role="user",
             alcohol_streak_start=None,
-            narcotics_streak_start=datetime.utcnow() - timedelta(minutes=45),
-            nicotine_streak_start=datetime.utcnow() - timedelta(days=30)
+            narcotics_streak_start=None,
+            nicotine_streak_start=None
         )
 
-        db.session.add_all([admin, moderator, user1, user2])
     db.session.commit()
     seed_resources()
 

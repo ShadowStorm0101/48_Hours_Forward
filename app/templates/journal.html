@@ -3,7 +3,6 @@
 {% block title %}Journal{% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="../static/journal.css">
 {% endblock %}
 
 {% block content %}
@@ -99,26 +98,26 @@
 
             <div style="padding: 12px 30px 0 30px; display:flex; gap:12px; align-items:center;">
               <button type="submit" class="create-new-btn" style="width:auto;">Save Entry</button>
+              <button type="submit"
+                    class="create-new-btn"
+                    style="width:auto; background:#dc3545;"
+                    formaction="{{ url_for('main.delete_journal_entry', entry_id=active_entry.id) }}"
+                    onclick="return confirm('Delete this journal entry?');">
+              Delete Entry
+            </button>
             </div>
 
-            <div style="padding: 20px 30px 12px 30px; flex:1; display:flex; flex-direction:column;">
+
+            <div style="padding: 20px 30px 0px 30px; flex:1; display:flex; flex-direction:column;">
               <textarea
                 name="content"
-                style="width:100%; min-height:350px; resize:vertical; font:inherit; padding:12px;"
+                style="width:100%; min-height:550px; resize:vertical; font:inherit; padding:12px;"
               >{{ active_entry.content }}</textarea>
             </div>
-          </form>
 
-          <div style="padding: 0 30px 30px 30px;">
-            <form method="POST"
-                  action="{{ url_for('main.delete_journal_entry', entry_id=active_entry.id) }}"
-                  onsubmit="return confirm('Delete this journal entry?');">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="create-new-btn" style="width:auto; background:#dc3545;">
-                Delete Entry
-              </button>
-            </form>
-          </div>
+
+
+          </form>
         {% else %}
         <header class="entry-header">
           <div class="entry-date">--/--/--</div>

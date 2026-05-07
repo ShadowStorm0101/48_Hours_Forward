@@ -3,20 +3,19 @@
 {% block title %}Help & Support{% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="../static/help.css">
 {% endblock %}
 
 {% block content %}
-  <div class="container" style="text-align: center;">
-    <h1 class="page-title" style="margin-top: 0; padding-top: 20px;">Help & Support</h1>
-  </div>
-  
+  <h1 class="page-title" style="margin-top: 0; padding-top: 20px;">Help & Support</h1>
+
   <div class="container" style="flex-direction: column; width: 100%; max-width: 800px; margin: 0 auto;">
     <!-- Accessibility Options -->
     <div class="help-section">
       <h2>Accessibility</h2>
       <p>Enhance the readability of the platform by toggling high contrast mode.</p>
+      <div class="help-form">
       <button id="high-contrast-toggle" class="btn">Toggle High Contrast Mode</button>
+      </div>
     </div>
 
     <!-- FAQ Section -->
@@ -42,10 +41,10 @@
       <form id="bug-form" action="https://formspree.io/f/meepkzad" method="POST" class="help-form">
         <label for="bug-title">Issue Title:</label>
         <input type="text" id="bug-title" name="bug-title" placeholder="Brief description of the issue" required>
-        
+
         <label for="bug-desc">Description & Steps to Reproduce:</label>
         <textarea id="bug-desc" name="bug-desc" rows="4" placeholder="Detailed description..." required></textarea>
-        
+
         <button type="submit" class="btn">Submit Bug Report</button>
         <p id="bug-status" style="display: none; color: green; margin-top: 10px; font-weight: bold;"></p>
       </form>
@@ -57,13 +56,13 @@
       <form id="contact-form" action="https://formspree.io/f/mykbjpel" method="POST" class="help-form">
         <label for="contact-name">Name:</label>
         <input type="text" id="contact-name" name="contact-name" required>
-        
+
         <label for="contact-email">Email:</label>
         <input type="email" id="contact-email" name="contact-email" required>
-        
+
         <label for="contact-message">Message:</label>
         <textarea id="contact-message" name="contact-message" rows="4" required></textarea>
-        
+
         <button type="submit" class="btn">Send Message</button>
         <p id="contact-status" style="display: none; color: green; margin-top: 10px; font-weight: bold;"></p>
       </form>
@@ -88,7 +87,7 @@
             'Accept': 'application/json'
           }
         });
-        
+
         if (response.ok) {
           form.reset();
           statusElement.textContent = "Successfully submitted!";
