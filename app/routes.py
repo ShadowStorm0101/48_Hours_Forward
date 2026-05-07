@@ -81,7 +81,7 @@ def reset_habit(habit):
 
     db.session.commit()
 
-    flash(f"{habit.capitalize()} streak reset.", "success")
+    flash(f"You have not failed {user.username},now is a great time to go again", "success")
     return redirect(url_for("main.dashboard"))
 
 
