@@ -15,33 +15,34 @@
     <option value="other">Other</option>
   </select><br><br>
 
+  <label>Age:</label><br>
+  <input type="range" name="age" min="10" max="80" value="18" oninput="updateAge(this.value)">
+  <br>
+  <span id="ageValue">18</span> years old
+  <br><br>
   <label>Age:</label><br>Ha
   <input type="number" name="age" required><br><br>
 
-<label>Select addictions:</label><br>
+  <label>Select addictions:</label><br>
 
-<input type="checkbox" name="addictions" value="alcohol"> Alcohol<br>
-<input type="checkbox" name="addictions" value="smoking"> Smoking<br>
-<input type="checkbox" name="addictions" value="narcotics"> Narcotics<br><br>
-
-<script>
-function confirmSelection() {
-    const selected = Array.from(document.querySelectorAll('input[name="addictions"]:checked'))
-        .map(el => el.value);
-
-    if (selected.length === 0) {
-        alert("Please select at least one addiction.");
-        return;
-    }
-
-    const confirmMsg = "Are you sure these are correct?\n\n" + selected.join(", ");
-    if (confirm(confirmMsg)) {
-        document.querySelector("form").submit();
-    }
-}
-</script>
+  <input type="checkbox" name="alcohol" value="alcohol"> Alcohol<br>
+  <input type="checkbox" name="nicotine" value="smoking"> Smoking<br>
+  <input type="checkbox" name="narcotics" value="narcotics"> Narcotics<br><br>
 
   <button type="button" onclick="confirmSelection()">Finish</button>
 </form>
+
+<script>
+function updateAge(val) {
+    document.getElementById("ageValue").textContent = val;
+}
+</script>
+
+<style>
+input[type="range"] {
+    width: 250px;
+    margin-top: 10px;
+}
+</style>
 
 {% endblock %}

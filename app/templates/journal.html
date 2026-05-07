@@ -1,7 +1,136 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}Journal{% endblock %}
 
+{% block head %}
+{% endblock %}
+
 {% block content %}
-<h1>Journal Page</h1>
+  <div class="journal-wrapper">
+
+    <aside class="journal-sidebar">
+      <div class="sidebar-header">
+        <form method="POST" action="{{ url_for('main.create_journal_entry') }}" style="width: 100%;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="create-new-btn">Create New</button>
+        </form>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="section-heading">Favourites</h3>
+        <ul class="journal-list">
+          {% for entry in favourites %}
+            <li class="journal-item {% if active_entry and entry.id == active_entry.id %}active{% endif %}">
+              <a href="{{ url_for('main.journal', entry_id=entry.id) }}"
+                 style="display:flex; align-items:center; flex:1; text-decoration:none; color:inherit;">
+                <span class="item-title">{{ entry.title }}</span>
+              </a>
+
+              <form method="POST"
+                    action="{{ url_for('main.toggle_journal_favourite', entry_id=entry.id) }}"
+                    style="margin:0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="background:none; border:none; cursor:pointer; padding:0; font-size:16px;">
+                  ⭐
+                </button>
+              </form>
+            </li>
+          {% else %}
+            <li class="journal-item">
+              <span class="item-title">No favourite entries yet</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="section-heading">Recent</h3>
+        <ul class="journal-list" id="recent-list">
+          {% for entry in recent %}
+            <li class="journal-item {% if active_entry and entry.id == active_entry.id %}active{% endif %}">
+              <a href="{{ url_for('main.journal', entry_id=entry.id) }}"
+                 style="display:flex; align-items:center; flex:1; text-decoration:none; color:inherit;">
+                <span class="item-title">{{ entry.title }}</span>
+              </a>
+
+              <form method="POST"
+                    action="{{ url_for('main.toggle_journal_favourite', entry_id=entry.id) }}"
+                    style="margin:0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="background:none; border:none; cursor:pointer; padding:0; font-size:16px;">
+                  ☆
+                </button>
+              </form>
+            </li>
+          {% else %}
+            <li class="journal-item">
+              <span class="item-title">No recent entries yet</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+
+    <main class="journal-main">
+      {% if active_entry %}
+  <form method="POST"
+        action="{{ url_for('main.save_journal_entry', entry_id=active_entry.id) }}"
+        style="display:flex; flex-direction:column; height:100%;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <header class="entry-header">
+      <div class="entry-date">
+        {{ active_entry.updated_at.strftime('%d/%m/%y') }}
+              </div>
+              <div class="entry-title-container">
+                <input
+                  type="text"
+                  class="entry-title-input"
+                  name="title"
+                  value="{{ active_entry.title }}"
+                  maxlength="120"
+                  required
+                >
+              </div>
+            </header>
+
+            <div style="padding: 12px 30px 0 30px; display:flex; gap:12px; align-items:center;">
+              <button type="submit" class="create-new-btn" style="width:auto;">Save Entry</button>
+              <button type="submit"
+                    class="create-new-btn"
+                    style="width:auto; background:#dc3545;"
+                    formaction="{{ url_for('main.delete_journal_entry', entry_id=active_entry.id) }}"
+                    onclick="return confirm('Delete this journal entry?');">
+              Delete Entry
+            </button>
+            </div>
+
+
+            <div style="padding: 20px 30px 0px 30px; flex:1; display:flex; flex-direction:column;">
+              <textarea
+                name="content"
+                style="width:100%; min-height:550px; resize:vertical; font:inherit; padding:12px;"
+              >{{ active_entry.content }}</textarea>
+            </div>
+
+
+
+          </form>
+        {% else %}
+        <header class="entry-header">
+          <div class="entry-date">--/--/--</div>
+          <div class="entry-title-container">
+            <h2 class="entry-title">No journal entries yet</h2>
+          </div>
+        </header>
+
+        <article class="entry-content">
+          <p>Create your first journal entry using the button on the left.</p>
+        </article>
+      {% endif %}
+    </main>
+
+  </div>
 {% endblock %}
