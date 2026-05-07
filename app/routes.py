@@ -562,8 +562,6 @@ def add_location():
 
 
 
-
-
 @main.route("/profile")
 @login_required
 def profile():
