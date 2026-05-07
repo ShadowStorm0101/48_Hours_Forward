@@ -60,7 +60,7 @@
 
 .journal-wrapper {
   display: flex;
-  height: calc(100vh - 110px); /* adjust to match your nav height */
+  height: calc(100vh - 110px);
   overflow: hidden;
   border-top: 1px solid #ccc;
 }
@@ -665,3 +665,234 @@ details p {
 }
 
 /* HELP PAGE END */
+
+/* ─── HIGH CONTRAST MODE ─── */
+/* Yellow for muted/secondary text */
+body.high-contrast .entry-date,
+body.high-contrast details p,
+body.high-contrast .entry-content p,
+body.high-contrast .pie-label,
+body.high-contrast .live-streak,
+body.high-contrast .milestone-box,
+body.high-contrast .help-section p,
+body.high-contrast .input-group label,
+body.high-contrast .item-title,
+body.high-contrast .services-details {
+  color: #ffff00 !important;
+}
+
+/* Cyan for labels, headings, section markers */
+body.high-contrast .section-heading,
+body.high-contrast .resource-heading,
+body.high-contrast .habit-title,
+body.high-contrast #map_services_header,
+body.high-contrast .services-name,
+body.high-contrast .help-section h2,
+body.high-contrast summary {
+  color: #00ffff !important;
+}
+
+/* Cyan for form labels specifically */
+body.high-contrast .help-form label {
+  color: #00ffff !important;
+}
+
+/* Yellow for nav active state text override */
+body.high-contrast .nav-item.active a {
+  color: #000 !important;
+}
+
+body.high-contrast {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+/* Navigation */
+body.high-contrast .nav-item {
+  background: #000;
+  border: 3px solid #fff;
+  color: #fff;
+  font-weight: 600;
+}
+
+body.high-contrast .nav-item a {
+  color: #fff;
+}
+
+body.high-contrast .nav-item:hover {
+  background: #222;
+  border-color: #fff;
+}
+
+body.high-contrast .nav-item.active {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+}
+
+/* General text */
+body.high-contrast h1,
+body.high-contrast h2,
+body.high-contrast h3,
+body.high-contrast .page-title {
+  color: #fff;
+}
+
+/* Buttons */
+body.high-contrast .btn,
+body.high-contrast .main-btn,
+body.high-contrast .entry-btn,
+body.high-contrast .create-new-btn,
+body.high-contrast .scroll-btn,
+body.high-contrast .reset-button,
+body.high-contrast .services_button {
+  background: #000;
+  border: 3px solid #fff;
+  color: #fff;
+  font-weight: 600;
+}
+
+body.high-contrast .btn:hover,
+body.high-contrast .main-btn:hover,
+body.high-contrast .entry-btn:hover,
+body.high-contrast .create-new-btn:hover,
+body.high-contrast .scroll-btn:hover,
+body.high-contrast .reset-button:hover {
+  background: #222;
+}
+
+body.high-contrast .entry-btn.danger {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+/* Journal */
+body.high-contrast .journal-wrapper,
+body.high-contrast .journal-sidebar,
+body.high-contrast .entry-header {
+  border-color: #fff;
+}
+
+body.high-contrast .journal-item {
+  border-color: #555;
+  color: #fff;
+}
+
+body.high-contrast .journal-item:hover {
+  background: #222;
+}
+
+body.high-contrast .journal-item.active {
+  background: #fff;
+  color: #000;
+}
+
+body.high-contrast .entry-title-input,
+body.high-contrast .entry-textarea {
+  background: #000;
+  color: #fff;
+  border-color: #fff;
+}
+
+body.high-contrast .entry-date {
+  color: #ffff00;
+  border-color: #555;
+}
+
+body.high-contrast .entry-content,
+body.high-contrast .entry-title {
+  color: #fff;
+}
+
+body.high-contrast .section-heading {
+  color: #fff;
+}
+
+/* Dashboard */
+body.high-contrast .pie-card,
+body.high-contrast .habit-card {
+  background: #000;
+  border: 3px solid #fff;
+  color: #fff;
+}
+
+body.high-contrast .habit-title,
+body.high-contrast .streak-box,
+body.high-contrast .milestone-box {
+  border-color: #fff;
+  color: #fff;
+}
+
+/* Resources */
+body.high-contrast .resource-card {
+  background: #000;
+  border: 3px solid #fff;
+  color: #fff;
+}
+
+body.high-contrast .resource-card:hover {
+  background: #222;
+}
+
+body.high-contrast .resource-row {
+  background: #111;
+  border-color: #fff;
+}
+
+body.high-contrast .resource-heading {
+  background: #000;
+  border: 3px solid #fff;
+  color: #fff;
+}
+
+/* Help page */
+body.high-contrast .help-section {
+  background: #000;
+  border: 3px solid #fff;
+  color: #fff;
+}
+
+body.high-contrast details {
+  background: #000;
+  border-color: #fff;
+  color: #fff;
+}
+
+body.high-contrast details p {
+  color: #ffff00;
+}
+
+body.high-contrast .help-form input,
+body.high-contrast .help-form textarea {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+/* Profile / habit buttons */
+body.high-contrast .habit-btn {
+  background: #000;
+  border: 3px solid #fff;
+  color: #fff;
+}
+
+body.high-contrast .habit-btn.active {
+  box-shadow: 0 0 0 6px #fff;
+}
+
+body.high-contrast .input-group input {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+body.high-contrast .input-group label {
+  color: #fff;
+}
+
+/* Map */
+body.high-contrast #map_services_frame {
+  background: #000;
+  border-color: #fff;
+  color: #fff;
+}

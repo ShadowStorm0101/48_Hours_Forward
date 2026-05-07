@@ -110,9 +110,15 @@ function initMap(centerLat, centerLng, zoom = 12) {
             title: place.name,
         });
 
-        const info = new google.maps.InfoWindow({
-            content: `<strong>${place.name}</strong> <br> Every ${place.day} at ${place.time}`
-        });
+    const icons = [
+    place.is_alcohol   ? '🍺' : '',
+    place.is_narcotics ? '💊' : '',
+    place.is_nicotine  ? '🚬' : '',
+    ].filter(Boolean).join(' ');
+
+    const info = new google.maps.InfoWindow({
+        content: `<strong>${place.name}</strong><br>${icons}<br>Every ${place.day} at ${place.time}`
+    });
 
         marker.addListener("click", () => info.open(map, marker));
         markers.push(marker);
@@ -147,7 +153,7 @@ function updateCenterMarker() {
 
 function focusPlace(lat, lng) {
     map.panTo({ lat, lng });
-    map.setZoom(22);
+    map.setZoom(15);
 }
 
 function loadMap() {
