@@ -120,7 +120,7 @@ def seed_data():
             age=22,
             alcohol_streak_start=None,
             narcotics_streak_start=None,
-            nicotine_streak_start=None,
+            nicotine_streak_start=None
         )
 
         user1 = User(
@@ -132,8 +132,8 @@ def seed_data():
             gender="other",
             age=46,
             alcohol_streak_start=datetime.utcnow() - timedelta(hours=8, minutes=20),
-            narcotics_streak_start=None,
-            nicotine_streak_start=datetime.utcnow() - timedelta(days=1, hours=2),
+            narcotics_streak_start=datetime.utcnow() - timedelta(days=60),
+            nicotine_streak_start=None,
         )
 
         user2 = User(
