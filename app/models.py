@@ -102,10 +102,14 @@ def seed_data():
             email="admin@example.com",
             password_hash=hash_password("Admin123!AAA", pepper),
             role="admin",
+            is_verified=True,
+            gender="male",
+            age=35,
             alcohol_streak_start=datetime.utcnow() - timedelta(days=120),
             narcotics_streak_start=datetime.utcnow() - timedelta(days=60),
             nicotine_streak_start=datetime.utcnow() - timedelta(days=13)
         )
+
         moderator = User(
             username="mod1",
             email="mod1@example.com",
@@ -116,26 +120,76 @@ def seed_data():
             age=22,
             alcohol_streak_start=None,
             narcotics_streak_start=None,
-            nicotine_streak_start=None
+            nicotine_streak_start=None,
         )
+
         user1 = User(
             username="user1",
             email="user1@example.com",
             password_hash=hash_password("User123!AAAA1", pepper),
             role="user",
-            alcohol_streak_start=None,
+            is_verified=True,
+            gender="other",
+            age=46,
+            alcohol_streak_start=datetime.utcnow() - timedelta(hours=8, minutes=20),
             narcotics_streak_start=None,
-            nicotine_streak_start=None
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=1, hours=2),
         )
+
         user2 = User(
             username="user2",
             email="user2@example.com",
             password_hash=hash_password("User456!AAAA1", pepper),
             role="user",
+            is_verified=True,
+            gender="female",
+            age=28,
             alcohol_streak_start=None,
-            narcotics_streak_start=None,
-            nicotine_streak_start=None
+            narcotics_streak_start=datetime.utcnow() - timedelta(days=45),
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=30),
         )
+
+        user3 = User(
+            username="user3",
+            email="user3@example.com",
+            password_hash=hash_password("User789!AAAA1", pepper),
+            role="user",
+            is_verified=False,
+            gender="other",
+            age=24,
+            alcohol_streak_start=datetime.utcnow() - timedelta(days=2, hours=5),
+            narcotics_streak_start=datetime.utcnow() - timedelta(minutes=40),
+            nicotine_streak_start=None,
+        )
+
+        user4 = User(
+            username="user4",
+            email="user4@example.com",
+            password_hash=hash_password("User101!AAAA1", pepper),
+            role="user",
+            is_verified=True,
+            gender="male",
+            age=41,
+            alcohol_streak_start=datetime.utcnow() - timedelta(days=365),
+            narcotics_streak_start=None,
+            nicotine_streak_start=datetime.utcnow() - timedelta(days=90),
+        )
+
+        user5 = User(
+            username="user5",
+            email="user5@example.com",
+            password_hash=hash_password("User202!AAAA1", pepper),
+            role="user",
+            is_verified=False,
+            gender="female",
+            age=31,
+            alcohol_streak_start=datetime.utcnow() - timedelta(minutes=12),
+            narcotics_streak_start=None,
+            nicotine_streak_start=None,
+        )
+
+        db.session.add_all([admin, moderator, user1, user2, user3, user4, user5])
+
 
     db.session.commit()
     seed_resources()
