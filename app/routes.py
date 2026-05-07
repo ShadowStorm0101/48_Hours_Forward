@@ -100,6 +100,12 @@ def register():
         raw_username = request.form.get("public_username", "")
         raw_email = request.form.get("email", "")
         raw_password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        # confirm passwords match
+        if raw_password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return render_template("register.html")
 
         try:
             username = validate_username(raw_username)
@@ -109,7 +115,7 @@ def register():
             flash(str(e), "error")
             return render_template("register.html")
 
-        # uniqueness checks BEFORE proceeding
+        # uniqueness checks
         if User.query.filter_by(email=email).first():
             flash("Email already exists", "error")
             return redirect(url_for("main.login"))
@@ -118,15 +124,20 @@ def register():
             flash("Username taken", "error")
             return render_template("register.html")
 
+        # HASH PASSWORD IMMEDIATELY
+        pepper = current_app.config["PASSWORD_PEPPER"]
+        password_hash = hash_password(password, pepper)
+
         # generate verification code
         code = str(random.randint(100000, 999999))
 
-        # store TEMP data in session (NOT DB)
+        # store ONLY SAFE DATA in session
         session["pending_user"] = {
             "username": username,
             "email": email,
-            "password": password  # plain for now, hash later
+            "password_hash": password_hash
         }
+
         session["verification_code"] = code
 
         send_verification_email(email, code)
@@ -152,14 +163,11 @@ def verify():
             flash("Invalid code", "error")
             return render_template("verify.html")
 
-        # ✅ NOW create user
-        pepper = current_app.config["PASSWORD_PEPPER"]
-        password_hash = hash_password(pending["password"], pepper)
-
+        # create verified user
         user = User(
             username=pending["username"],
             email=pending["email"],
-            password_hash=password_hash,
+            password_hash=pending["password_hash"],
             is_verified=True
         )
 
