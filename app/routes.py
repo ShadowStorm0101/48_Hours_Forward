@@ -1,16 +1,13 @@
-import logging
 import random
 from datetime import datetime, timedelta
 
 from flask import render_template, request, flash, redirect, url_for, session, current_app
-from sqlalchemy.orm import joinedload
 
 from . import db
-from .models import User, LocationService, Resource, JournalEntry
+from .models import User, JournalEntry
 from .utils.email_notifications import send_checkin_reminder_email
-from .utils.validators import validate_email, validate_password, validate_bio, validate_username
-from .utils.sanitize import sanitize_html
-from .utils.encryption import hash_password, verify_password, encrypt_bio
+from .utils.validators import validate_email, validate_password, validate_username
+from .utils.encryption import hash_password, verify_password
 from .utils.email import send_verification_email
 from .dashboard import distance_milestone
 from .user_functions import _current_user, login_required, main, security_logger
@@ -163,6 +160,7 @@ def dashboard():
             "40_plus": 0
         }
 
+        # iterate through users, add to counter
         for u in users:
             if u.gender == "male":
                 male += 1
@@ -171,6 +169,7 @@ def dashboard():
             elif u.gender == "other":
                 other += 1
 
+            # increasing counts
             if u.alcohol_streak_start is not None:
                 alcohol += 1
 

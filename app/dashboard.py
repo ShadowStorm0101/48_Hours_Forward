@@ -6,17 +6,19 @@ from . import db
 
 
 
-
+# calculate distance to next milestone
 def distance_milestone(delta):
-    milestones = [1, 3, 7, 14, 30, 50, 100, 365, 1000]
+    milestones = [1, 3, 7, 14, 30, 50, 100, 365, 1000]  # can be changed to further promote users sobriety
 
     for milestone in milestones:
         if delta.days < milestone:
-            remaining = timedelta(days=milestone) - delta
+            remaining = timedelta(days=milestone) - delta  # calc distance to milestone
 
+            # format into hours and days
             total_hours = int(remaining.total_seconds() // 3600)
             total_days = remaining.days
 
+            # if less than 72 hours show hours left, else show days
             if total_hours <= 72:
                 return f"{total_hours} hours until your {milestone} day milestone!"
 
@@ -34,6 +36,7 @@ def reset_habit(habit):
         flash("Please log in first.", "error")
         return redirect(url_for("main.login"))
 
+    # set user streak to be now
     if habit == "alcohol":
         user.alcohol_streak_start = datetime.utcnow()
     elif habit == "nicotine":

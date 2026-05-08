@@ -25,6 +25,8 @@ def create_journal_entry():
 
     return redirect(url_for("main.journal", entry_id=entry.id))
 
+
+
 @main.route("/journal/<int:entry_id>/save", methods=["POST"])
 @login_required
 def save_journal_entry(entry_id):
@@ -46,6 +48,7 @@ def save_journal_entry(entry_id):
     return redirect(url_for("main.journal", entry_id=entry.id))
 
 
+
 @main.route("/journal/<int:entry_id>/toggle-favourite", methods=["POST"])
 @login_required
 def toggle_journal_favourite(entry_id):
@@ -59,6 +62,8 @@ def toggle_journal_favourite(entry_id):
     db.session.commit()
 
     return redirect(url_for("main.journal", entry_id=entry.id))
+
+
 
 @main.route("/journal/<int:entry_id>/delete", methods=["POST"])
 @login_required
