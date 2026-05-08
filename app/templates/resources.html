@@ -71,6 +71,35 @@
   </section>
 
 
+
+
+
+{% if user.role == "admin" %}
+  <div id="add-resource-form">
+  <h3>Add New Resource</h3>
+
+  <form method="POST" action="{{ url_for('main.add_resource') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <input type="text" name="name" placeholder="Resource name" required>
+    <input type="text" name="url" placeholder="url link" required>
+
+    <label><input type="checkbox" name="is_alcohol"> 🍺 Alcohol</label>
+    <label><input type="checkbox" name="is_nicotine"> 🚬 Nicotine</label>
+    <label><input type="checkbox" name="is_narcotics"> 💊 Narcotics</label>
+
+    <button type="submit">Add Resource</button>
+  </form>
+  </div>
+{% endif %}
+
+
+
+
+
+
+
+
 {% endblock %}
 
 {% block scripts %}
