@@ -12,3 +12,7 @@ Administrators are able to manage and add new support locations directly onto th
 Additional account management and support features include credential updates, password changes, account verification, and a built-in help system that enables users to report bugs, issues, or concerns directly through the platform.
 
 The goal of 48 Hours Forward is to provide a safe, supportive, and practical environment that empowers individuals to move forward one step at a time.
+
+
+
+Check instructions.md for running our application

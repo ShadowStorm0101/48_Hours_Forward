@@ -37,8 +37,6 @@ docker compose down
 
 
 
-
-
 # Email Reminder Setup
 The email notification system uses Resend to send reminder emails to users who have not logged in for 24 hours.
 To enable live email sending:
