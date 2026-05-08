@@ -2,7 +2,7 @@ from .user_functions import main
 from flask import  flash, redirect, url_for, request, session, render_template
 from . import db
 from .models import User
-import datetime
+from datetime import datetime
 
 
 
